@@ -1,0 +1,22 @@
+<?php
+
+// @todo Write an admin page to take a list of view names on which to
+// perform this modification.
+
+function no_title_link_views_post_render( &$view, &$output, &$cache ) {
+
+  if ( $view->name === 'latest_auction' ) {
+    
+//dsm( $view );
+
+    $regex = '#<h2 class="title"><a href=".*">(.*)</a></h2>#';
+    $replace = '<h2 class="title">\1</h2>';
+    $new_output = preg_replace( $regex, $replace, $output );
+
+//dsm( $new_output );
+
+    $output = $new_output;
+  }
+}
+
+?>

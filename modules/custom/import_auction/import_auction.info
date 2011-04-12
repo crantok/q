@@ -1,0 +1,7 @@
+; $Id
+
+name = Import auction
+description = Import an auction as a set of 'lot' nodes
+package = Quest
+core = 6.x
+

@@ -1,0 +1,310 @@
+<?php
+
+define('IMPORT_AUCTION_FILE_ELEMENT_NAME', 'upload');
+define('IMPORT_AUCTION_SUBPATH', 'auction_import');
+
+function import_auction_perm() {
+  return array( 'import auction' );
+}
+  
+function import_auction_menu() {
+  
+  // The simplest kind of menu: A simple call to a function with a menu entry.
+  // The key of the menu item (menu_example/simplest) is the path that defines
+  // the menu router entry.
+  $items['import_auction'] = array(
+    // The menu type is not required, as we're using the default.
+    // 'type' => MENU_NORMAL_ITEM,
+
+    // The title - do NOT use t() as t() is called automatically.
+    'title' => 'Import auction lots',
+
+    // Description (hover flyover for menu link). Does NOT use t(), which is
+    // called automatically.
+    'description' => 'Import auction lots from CSV file',
+
+    // Function to be called when this path is accessed.
+    'page callback' => 'drupal_get_form',
+
+    // Arguments to the page callback. Here's we'll use them just to provide
+    // content for our page.
+    'page arguments' => array( 'import_auction_upload_form' ),
+
+    'access arguments' => array( 'import auction' ),
+
+  );
+  
+  return $items;
+}
+
+function import_auction_upload_form() {
+  
+  // create an empty form array
+  $form = array();
+
+  // set the form encoding type
+  $form['#attributes']['enctype'] = "multipart/form-data";
+
+  // add a file upload file
+  $form[IMPORT_AUCTION_FILE_ELEMENT_NAME] = array(
+    '#type' => 'file',
+    '#title' => t('Choose CSV file to import'),
+    '#description' => t(
+    'First, click on "Browse". This will allow you to choose a file ' .
+    'on your computer to upload. You may upload a file with a .txt ' .
+    'or a .csv extension. It must be a comma separated text file. ' .
+    'Finally, when you have selected a file, click on "Import" in ' .
+    'order to process the file and import the auction lots.'
+    ),
+  );
+   
+  // add a submit button
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => 'Import',
+  );
+
+  return $form;
+}
+
+function import_auction_upload_form_validate($form, &$form_state) {
+
+  // Was a file successfully loaded?
+  if ( isset($_FILES['files']) &&
+       is_uploaded_file($_FILES['files']['tmp_name'][IMPORT_AUCTION_FILE_ELEMENT_NAME]) ) {
+
+    // Establish the path to which to save the CSV for import.
+    $desired_path = file_directory_path() . '/' . IMPORT_AUCTION_SUBPATH;
+    if ( file_check_directory( $desired_path, TRUE ) ) {
+      $save_path = $desired_path;
+    } else {
+      $save_path = file_directory_path();
+    }
+    
+    // attempt to save the uploaded file
+    $file = file_save_upload(
+     IMPORT_AUCTION_FILE_ELEMENT_NAME, array(), $save_path, FILE_EXISTS_REPLACE );
+
+    // set error if file was not uploaded
+    if (!$file) {
+      form_set_error(IMPORT_AUCTION_FILE_ELEMENT_NAME, 'Error uploading file.');
+      return;
+    }
+    
+    if ( ! file_set_status( $file, FILE_STATUS_PERMANENT ) ) {
+      drupal_set_message( 'Error saving file.', 'error' );
+      return;
+    }
+//dsm( $file );
+
+    // set files to form_state, to process when form is submitted
+    $form_state['values']['file'] = $file;
+    
+  } else {
+    // set error
+    form_set_error(IMPORT_AUCTION_FILE_ELEMENT_NAME, 'Error uploading file.');
+    return;   
+  }
+}
+
+function import_auction_upload_form_submit($form, &$form_state) {
+  
+  // Get the lines of the CSV file as string elements in an array.
+  // NOTE: FILE_IGNORE_NEW_LINES did not work on willow.ecohost !!!
+  // Apparently, some versions of PHP will strip \r or \n but not \r\n
+  // That's 2 hours of my life down the tubes ... grrrrrrh!!!
+  $lines = file(
+    $form_state['values']['file']->filepath,
+    FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES
+  );
+  
+  // For debugging
+  $debug_first_lot = 0;
+  $debug_first_subcat = '';
+  
+  // Most lots fall in to a primary_category. primary_category-defining lines are
+  // preceded by a special line that includes no text.
+  $primary_category = NULL;
+
+  // All lots have a secondary_category.
+  $secondary_category = '';
+  
+  // If zero lots have been imported since the last primary_category was parsed
+  // then the last primary_category
+  $num_lots_since_prev_cat = 0;
+  
+  // Commas in fields will have been converted to another character
+  // before saving. Determine what character should be converted back
+  // to a comma.
+  $alt_comma = variable_get( 'auction_import_alt_comma', chr(0xAC) );
+  
+  // Sometimes a line of text appears in the lot list. In terms of
+  // regex, this line appears to be a catgory or secondary_category. As a crude
+  // filter mechanism, define a maximum length for (sub)categories.
+  // Anything longer than this will be interpreted as text to ignore.
+  $max_cat_len = variable_get( 'auction_import_max_cat_len', 50 );
+    
+  foreach ( $lines as $line ) {
+
+    // FILE_IGNORE_NEW_LINES did not work on willow.ecohost !!!
+    // so manually trimming instead.
+    $line = trim( $line, "\r\n" );
+
+    // This array is for extracting primary_category names from regex matches.
+    $cat_array = array();
+    
+    switch ( 1 ) { // Using this for pattern matching with preg_match()
+
+      // *** Is this a line to ignore? ***
+      case ( preg_match( '#^,[\W]+,$#', $line ) ) :
+      break;
+
+        //// Indicate that we expect a primary_category on the next line.
+        //$primary_category = $secondary_category = '';
+      //break;
+
+      // *** Is this a primary_category or secondary_category line? ***
+      case ( preg_match( '#^,([^,]+),$#', $line, $cat_array ) ) :
+        
+        $correct_text = str_replace( $alt_comma, ',', $cat_array[1] );
+
+        // Is text length short enough to qualify as a category?
+        if ( strlen( $correct_text ) <= $max_cat_len ) {
+          $cat = $correct_text;
+
+          // If there were zero lots parsed since the previous category
+          // was parsed then that category was a primary category.
+          if ( $num_lots_since_prev_cat == 0 ) {
+            if ( $secondary_category) {
+              // About to process the first secondary category of a new
+              // primary category. Output debug info for the previous
+              // primary category.
+              $debug =
+                'Primary category: ' . ( $primary_category ? $primary_category : 'None' ) . "\n" .
+                'Secondary categories: "' . $debug_first_subcat . '" to "' . $debug_prev_subcat . "\"\n" .
+                'Lots: ' . $debug_first_lot . ' to ' . $latest_lot_number . "\n"
+              ;
+              dsm( $debug );
+
+              $debug_first_lot = 0;
+              $primary_category = $secondary_category;
+            }
+            // Mark current category as the first secondary category of
+            // a new primary category.
+            $debug_first_subcat = $cat;
+          }            
+
+          $debug_prev_subcat = $secondary_category;
+          $secondary_category = $cat;
+          $num_lots_since_prev_cat = 0;
+          
+
+        } else {
+          dsm( 'Text to ignore after lot ' . $latest_lot_number . ': ' . $correct_text );
+        }
+        
+      break;
+      
+      // *** This line should describe a lot. ***
+      default :
+
+        if ( $primary_category === '' ) {
+          drupal_set_message(
+            'Import error: No primary_category defined when trying to import a lot.', 'error'
+          );
+        }
+        
+        $lot_array = explode( ',', $line );
+        $correct_description = str_replace( $alt_comma, ',', $lot_array[1] );
+
+        $lot = new StdClass;
+        $lot->number = (int)$lot_array[0];
+        $lot->description = $correct_description;
+        $lot->price = $lot_array[2];
+        $lot->primary_category = $primary_category;
+        $lot->secondary_category = $secondary_category;
+        
+        _import_auction_insert_lot_node( $lot );
+        
+        $num_lots_since_prev_cat++;
+        
+        $latest_lot_number = $lot->number;
+        if ( $debug_first_lot === 0 ) {
+          $debug_first_lot = $latest_lot_number;
+        }
+      break;
+    }//switch
+  }//foreach
+
+  $debug =
+    'Primary category: ' . ( $primary_category ? $primary_category : 'None' ) . "\n" .
+    'Secondary categories: "' . $debug_first_subcat . '" to "' . $debug_prev_subcat . "\"\n" .
+    'Lots: ' . $debug_first_lot . ' to ' . $latest_lot_number . "\n"
+  ;
+  dsm( $debug );
+}//fn
+
+
+function _import_auction_insert_lot_node( $lot ) {
+  
+  //static $exit = 0;
+  //if ( $exit ) {
+    return;
+  //} else {
+    //$exit = TRUE;
+  //}
+  
+  global $user;
+
+  $node = new stdClass();
+  // leaving the $nid out will tell node_save() it is a new node
+  $node->type = 'auction_lot';
+  $node->uid = $user->uid;
+  $node->status = '1';
+  $node->promote = '0';
+  $node->sticky = '0';
+  $node->comment = '0';
+  //$node->comment_count = '0';
+  //$node->taxonomy = array();
+
+  $node->title = $lot->number;
+  $node->field_lot_category[0]['value'] = $lot->primary_category;
+  $node->field_lot_secondary_category[0]['value'] = $lot->secondary_category;
+  $node->field_lot_price[0]['value'] = $lot->price;
+  $node->field_lot_description[0]['value'] = $lot->description;
+
+  //dsm($node);
+  node_save($node);
+  //dsm($node);
+
+  if ( ! $node->nid ){
+    drupal_set_message(t('There was a problem creating lot ') . $lot->number, 'error' );
+  }
+}
+
+// @todo : Add info / input for import page
+  // - What auctions already have lots imported?
+  // - What auction will these bids be for?
+// @todo : Add auction_lot field for auction number or reference
+// @todo : Add search module and see what it can do
+// @todo : Add customer and admin views for lots
+// @todo : Add image field to lot
+// @todo : Add bidding form (block in content area?) to lot
+// @todo : Users need to be able to register
+// @todo : Report for admin on bids - reversible chronological order / start from
+// @todo : Report for customer - see bids they've made
+// @todo : 
+// @todo : 
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,8 @@
+; $Id
+
+name = No title link
+description = Stops the titles of full nodes in a view from linking to the node itself
+package = Custom
+core = 6.x
+dependencies[] = views
+
