@@ -48,26 +48,36 @@ function import_auction_upload_form() {
   // add a file upload file
   $form[IMPORT_AUCTION_FILE_ELEMENT_NAME] = array(
     '#type' => 'file',
+    '#size' => 55,
     '#title' => t('Choose CSV file to import'),
-    '#description' => t(
-    'First, click on "Browse". This will allow you to choose a file ' .
-    'on your computer to upload. You may upload a file with a .txt ' .
-    'or a .csv extension. It must be a comma separated text file. ' .
-    'Finally, when you have selected a file, click on "Import" in ' .
-    'order to process the file and import the auction lots.'
-    ),
+    '#description' => t( '<ul>' .
+      '<li>Click in the box above. This will allow you to choose a file on your computer to import.</li>' .
+      '<li>You may upload a file with a .txt or a .csv extension. It must be a comma separated text file.</li>' .
+      '<li>After selecting a file, you may click on "Simulate" in order to see a summary of what would be imported.</li>' .
+      '<li>Finally, if you are happy with the simulation, you may click on "Import" in order to process the file and import the auction lots.</li>' .
+      '</ul>'),
   );
    
   // add a submit button
-  $form['submit'] = array(
+  $form['submit_simulate'] = array(
+    '#type' => 'submit',
+    '#value' => 'Simulate',
+    '#validate' => array( '_import_auction_upload_form_validate' ),
+    '#submit' => array('_import_auction_upload_form_simulate'),
+  );
+
+  // add a submit button
+  $form['submit_import'] = array(
     '#type' => 'submit',
     '#value' => 'Import',
+    '#validate' => array( '_import_auction_upload_form_validate' ),
+    '#submit' => array('_import_auction_form_submit_import'),
   );
 
   return $form;
 }
 
-function import_auction_upload_form_validate($form, &$form_state) {
+function _import_auction_upload_form_validate($form, &$form_state) {
 
   // Was a file successfully loaded?
   if ( isset($_FILES['files']) &&
@@ -107,7 +117,15 @@ function import_auction_upload_form_validate($form, &$form_state) {
   }
 }
 
-function import_auction_upload_form_submit($form, &$form_state) {
+function _import_auction_upload_form_simulate( $form, &$form_state ) {
+  _import_auction_upload_form_submit($form, $form_state, TRUE );
+}
+
+function _import_auction_form_submit_import( $form, &$form_state ) {
+  _import_auction_upload_form_submit($form, $form_state, FALSE );
+}
+
+function _import_auction_upload_form_submit($form, &$form_state, $is_simulation) {
   
   // Get the lines of the CSV file as string elements in an array.
   // NOTE: FILE_IGNORE_NEW_LINES did not work on willow.ecohost !!!
@@ -224,7 +242,9 @@ function import_auction_upload_form_submit($form, &$form_state) {
         $lot->primary_category = $primary_category;
         $lot->secondary_category = $secondary_category;
         
-        _import_auction_insert_lot_node( $lot );
+        if ( ! $is_simulation ) {
+          _import_auction_insert_lot_node( $lot );
+        }
         
         $num_lots_since_prev_cat++;
         
@@ -249,7 +269,7 @@ function _import_auction_insert_lot_node( $lot ) {
   
   //static $exit = 0;
   //if ( $exit ) {
-    return;
+    //return;
   //} else {
     //$exit = TRUE;
   //}

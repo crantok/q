@@ -5,3 +5,16 @@
   margin-bottom: 20px;
 }
 
+.messages {
+  font-size: 1.35em;
+}
+
+.form-item .description {
+  font-size: 1.2em;
+  line-height: 1.5em;
+}
+
+#edit-submit-simulate {
+  margin-left:  150px;
+  margin-right: 200px;
+}
