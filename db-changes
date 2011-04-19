@@ -1,3 +1,19 @@
+On local:
+ - add fields to "Profile" content type
+ - enable use of "Profile" as a content profile
+ - enable use of "Profile" on user registration form
+ - enable use of "Profile" on admin user registration form
+ - export "Profile"
 
+Feature?, yeah!
+
+On live:
+ - Enable nodereference module
  - Enable content_copy module
- - Import the Auction lot content type
+ - Import the Auction Lot content type
+
+ - enable content_profile module
+ - enable content_profile_registration module
+ - Import the Profile content type
+
+ - enable webform module

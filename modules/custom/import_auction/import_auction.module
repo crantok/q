@@ -265,7 +265,7 @@ function _import_auction_upload_form_submit($form, &$form_state, $is_simulation)
 }//fn
 
 
-function _import_auction_insert_lot_node( $lot ) {
+function _import_auction_insert_lot_node( $lot, $auction_nid ) {
   
   //static $exit = 0;
   //if ( $exit ) {
@@ -292,6 +292,7 @@ function _import_auction_insert_lot_node( $lot ) {
   $node->field_lot_secondary_category[0]['value'] = $lot->secondary_category;
   $node->field_lot_price[0]['value'] = $lot->price;
   $node->field_lot_description[0]['value'] = $lot->description;
+  $node->field_lot_auction[0]['nid'] = $auction_nid;
 
   //dsm($node);
   node_save($node);
@@ -302,25 +303,29 @@ function _import_auction_insert_lot_node( $lot ) {
   }
 }
 
-// @todo : Add info / input for import page
-  // - What auctions already have lots imported?
-  // - What auction will these bids be for?
-// @todo : Add auction_lot field for auction number or reference
+// @todo : Get node ID of current auction, for use in creating lots (change import form?)
+
 // @todo : Add search module and see what it can do
-// @todo : Add customer and admin views for lots
-// @todo : Add image field to lot
-// @todo : Add bidding form (block in content area?) to lot
-// @todo : Users need to be able to register
-// @todo : Report for admin on bids - reversible chronological order / start from
-// @todo : Report for customer - see bids they've made
+// @todo : Add customer View for lots for current auction (with search)
+// @todo : Add bidding webform (block in content area?) to lot and have
+//         it email admin when submitted
+// @todo : Flesh out a content profile to gather information at registration
 // @todo : 
 // @todo : 
 
+// @bonus : Add image field to lot
+// @bonus : Add ability for admin to delete lots for a given auction
+// @bonus : Report for customer - see bids they've made
+// @bonus : Report for admin - see winning bids for each lot (bid time is v. important)
 
 
 
 
-
+function import_auction_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
+  //if ( $op === 'view' ) {
+    //dsm( $node );
+  //}
+}
 
 
 

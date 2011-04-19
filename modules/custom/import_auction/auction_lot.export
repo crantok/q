@@ -334,6 +334,87 @@ $content['fields']  = array (
       ),
     ),
   ),
+  4 => 
+  array (
+    'label' => 'Auction',
+    'field_name' => 'field_lot_auction',
+    'type' => 'nodereference',
+    'widget_type' => 'nodereference_select',
+    'change' => 'Change basic information',
+    'weight' => '7',
+    'autocomplete_match' => 'contains',
+    'size' => 60,
+    'description' => '',
+    'default_value' => 
+    array (
+      0 => 
+      array (
+        'nid' => '',
+      ),
+    ),
+    'default_value_php' => '',
+    'default_value_widget' => 
+    array (
+      'field_lot_auction' => 
+      array (
+        0 => 
+        array (
+          'nid' => '',
+        ),
+        'nid' => 
+        array (
+          'nid' => '',
+        ),
+      ),
+    ),
+    'required' => 0,
+    'multiple' => '0',
+    'referenceable_types' => 
+    array (
+      'auction' => 'auction',
+      'auction_lot' => 0,
+      'page' => 0,
+      'story' => 0,
+    ),
+    'advanced_view' => '--',
+    'advanced_view_args' => '',
+    'op' => 'Save field settings',
+    'module' => 'nodereference',
+    'widget_module' => 'nodereference',
+    'columns' => 
+    array (
+      'nid' => 
+      array (
+        'type' => 'int',
+        'unsigned' => true,
+        'not null' => false,
+        'index' => true,
+      ),
+    ),
+    'display_settings' => 
+    array (
+      'label' => 
+      array (
+        'format' => 'above',
+        'exclude' => 0,
+      ),
+      'teaser' => 
+      array (
+        'format' => 'default',
+        'exclude' => 0,
+      ),
+      'full' => 
+      array (
+        'format' => 'default',
+        'exclude' => 0,
+      ),
+      4 => 
+      array (
+        'format' => 'default',
+        'exclude' => 0,
+      ),
+    ),
+  ),
 );
 $content['extra']  = array (
   'title' => '-5',
