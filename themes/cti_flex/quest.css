@@ -18,3 +18,34 @@
   margin-left:  150px;
   margin-right: 200px;
 }
+
+.page-current-auction label {
+  font-weight: bold;
+}
+.page-current-auction .views-field-nothing {
+  margin-bottom: 20px;
+}
+
+.view-id-auction_lots .views-exposed-form .views-exposed-widget #edit-title {
+  width: 200px;
+}
+
+.view-id-auction_lots .views-exposed-form .views-exposed-widget input.form-submit {
+  margin-top: 1.0em;
+  padding: 1px 7px;
+}
+
+.view-id-auction_lots .views-exposed-form .views-reset-button {
+  float: right;
+  padding: 0.5em 0 0 0;
+}
+
+.view-id-auction_lots tr.odd td,
+.view-id-auction_lots tr.even td {
+  padding: 8px 15px;
+}
+
+.view-id-auction_lots td.views-field-field-lot-category-value .field-item {
+  white-space: nowrap;
+}
+

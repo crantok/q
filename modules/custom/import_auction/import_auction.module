@@ -334,12 +334,10 @@ function _import_auction_insert_lot_node( $lot, $auction_nid ) {
   }
 }
 
-// @todo : Use node ID of current auction in auction lot creation.
-
-// @todo : Add search module and see what it can do
-// @todo : Add customer View for lots for current auction (with search)
 // @todo : Add bidding webform (block in content area?) to lot and have
 //         it email admin when submitted
+// @todo : Maybe the link to the bidding webform is from a text/link field
+//         in the view and the form is prepopulated for the lot.
 // @todo : Flesh out a content profile to gather information at registration
 // @todo : 
 // @todo : 
