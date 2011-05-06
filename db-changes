@@ -17,3 +17,7 @@ On live:
  - Import the Profile content type
 
  - enable webform module
+
+ - enable computed_field module
+ 
+ 

@@ -256,10 +256,10 @@ function _import_auction_upload_form_submit($form, &$form_state, $is_simulation)
         $lot->primary_category = $primary_category;
         $lot->secondary_category = $secondary_category;
 
-        if ( ! isset( $junk1 ) ) {
-          dsm( $lot );
-          $junk1 = 1;
-        }
+        //if ( ! isset( $junk1 ) ) {
+          //dsm( $lot );
+          //$junk1 = 1;
+        //}
         
         if ( ! $is_simulation ) {
           _import_auction_insert_lot_node( $lot, $auction_nid );

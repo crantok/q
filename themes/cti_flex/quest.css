@@ -51,7 +51,7 @@
   padding: 8px 15px;
 }
 
-.view-id-auction_lots td.views-field-field-lot-category-value .field-item {
+.view-id-auction_lots td.views-field-field-lot-category-value{
   white-space: nowrap;
 }
 
