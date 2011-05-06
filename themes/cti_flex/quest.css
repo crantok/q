@@ -40,6 +40,12 @@
   padding: 0.5em 0 0 0;
 }
 
+.view-id-auction_lots .view-empty {
+  padding: 20px;
+  font-size: 1.375em;
+  line-height: 1.25em;
+}
+
 .view-id-auction_lots tr.odd td,
 .view-id-auction_lots tr.even td {
   padding: 8px 15px;
