@@ -4,7 +4,7 @@ define('IMPORT_AUCTION_FILE_ELEMENT_NAME', 'upload');
 define('IMPORT_AUCTION_SUBPATH', 'auction_import');
 
 function import_auction_perm() {
-  return array( 'import auction' );
+  return array( 'import auction', 'bid on auction lot' );
 }
   
 function import_auction_menu() {
@@ -34,10 +34,20 @@ function import_auction_menu() {
 
   );
   
+  // Auction lot specific page for bidding.
+  $items['auction/%node/bid/%node'] = array(
+    'type' => MENU_CALLBACK,
+    'title callback' => '_import_auction_bid_page_title',
+    'title arguments' => array(1,3),
+    'page callback' => '_import_auction_bid_page',
+    'page arguments' => array(1,3),
+    'access arguments' => array( 'bid on auction lot' ),
+  );
+  
   return $items;
 }
 
-function import_auction_upload_form() {
+function _import_auction_upload_form() {
   
   // create an empty form array
   $form = array();
@@ -333,6 +343,34 @@ function _import_auction_insert_lot_node( $lot, $auction_nid ) {
     drupal_set_message(t('There was a problem creating lot ') . $lot->number, 'error' );
   }
 }
+
+
+//function _import_auction_auction_load( $nid ) {
+  //return node_load
+//}
+
+//function _import_auction_lot_load( $nid ) {
+//}
+
+function _import_auction_bid_page_title( $auction, $lot ) {
+  return t(
+    'Bid on lot @lot_number in auction @auction_number. Auction ends @end_time.',
+    array(
+      '@lot_number' => $lot->title,
+      '@auction_number' => $auction->title,
+      '@end_time' => substr( $auction->field_auction_end_time[0]['value'], 0, 10 ),
+    )
+  );
+}
+
+function _import_auction_bid_page( $auction, $lot ) {
+
+//  return node_view( $lot, false, false, false ); // to much crap, inc title.
+
+  return '<br/><br/><br/><h1>------------------- TO DO -------------------</h1>';
+  
+}
+
 
 // @todo : Add bidding webform (block in content area?) to lot and have
 //         it email admin when submitted
