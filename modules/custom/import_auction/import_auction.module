@@ -35,6 +35,7 @@ function import_auction_menu() {
   );
   
   // Auction lot specific page for bidding.
+  // Loading params using node_load. (Auction required for title.)
   $items['auction/%node/bid/%node'] = array(
     'type' => MENU_CALLBACK,
     'title callback' => '_import_auction_bid_page_title',
@@ -366,9 +367,29 @@ function _import_auction_bid_page_title( $auction, $lot ) {
 function _import_auction_bid_page( $auction, $lot ) {
 
 //  return node_view( $lot, false, false, false ); // to much crap, inc title.
-
-  return '<br/><br/><br/><h1>------------------- TO DO -------------------</h1>';
+//  return '<br/><br/><br/><h1>------------------- TO DO -------------------</h1>';
   
+  $page = '';
+  $page .= '<div class="bid-page-lot">';
+  $page .= '<div class="field-lot-description field-lot-item">';
+  $page .= check_plain( $lot->field_lot_description[0]['value'] );
+  $page .= '</div>';
+  $page .= '<div class="field-lot-category field-lot-item">';
+  foreach ( $lot->field_lot_category as $category ) {
+    $page .= '<div class="field-lot-category-item">';
+    $page .= check_plain( $category['value'] );
+    $page .= '</div>';
+  }
+  $page .= '</div>'; // class="field-lot-category"
+  $page .= '<div class="field-lot-price field-lot-item">';
+  $page .= check_plain( '£' . $lot->field_lot_price[0]['value'] );
+  $page .= '</div>';
+  $page .= '</div>'; // class="bid-page-lot"
+  
+  // define a small form for bid amount and submit button
+  // $page .= drupal_get_form( XXX );
+  
+  return $page;
 }
 
 
