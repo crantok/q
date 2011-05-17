@@ -359,7 +359,10 @@ function _import_auction_bid_page_title( $auction, $lot ) {
     array(
       '@lot_number' => $lot->title,
       '@auction_number' => $auction->title,
-      '@end_time' => substr( $auction->field_auction_end_time[0]['value'], 0, 10 ),
+      '@end_time' => format_date(
+        strtotime( $auction->field_auction_end_time[0]['value'] ),
+        'large'
+      ),
     )
   );
 }
