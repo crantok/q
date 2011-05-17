@@ -389,12 +389,42 @@ function _import_auction_bid_page( $auction, $lot ) {
   $page .= '</div>';
   $page .= '</div>'; // class="bid-page-lot"
   
-  // define a small form for bid amount and submit button
-  // $page .= drupal_get_form( XXX );
+  $page .= drupal_get_form( '_import_auction_bid_form' );
   
   return $page;
 }
 
+function _import_auction_bid_form() {
+  
+  $form = array();
+  
+  $form['bid-amount'] = array(
+    '#type' => 'textfield',
+    '#title' => 'Bid amount, in pounds sterling (£)',
+  );
+  
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Register bid'),
+  );
+  
+  return $form;
+}
+
+function _import_auction_bid_form_validate( &$form, &$form_state ) {
+  
+  if ( ! is_numeric( $form_state['values']['bid-amount'] ) ) {
+    form_set_error( 'bid-amount', 'Please enter a valid bid amount' );
+  }
+}
+
+function _import_auction_bid_form_submit( &$form, &$form_state ) {
+  
+  dsm( 'submitted' );
+  
+  // send email from user to site admin, and CC user.
+  
+}
 
 // @todo : Add bidding webform (block in content area?) to lot and have
 //         it email admin when submitted
