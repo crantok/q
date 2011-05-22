@@ -428,15 +428,18 @@ function _import_auction_bid_form_submit( &$form, &$form_state ) {
   $params = array (
     'site_name' => variable_get( 'site_name', 'Quest'),
     'user_login' => $user->name,
+    'user_email' => $user->mail,
     'user_page' => url( 'user/' . $user->uid, array( 'absolute' => TRUE ) ),
     'lot_number' => $lot->title,
     'lot_page' => url( 'node/' . $lot->nid, array( 'absolute' => TRUE ) ),
     'bid_amount' => $form_state['values']['bid-amount'],
     'bid_time' => substr_replace( substr_replace( date( 'jS F, H:is ' ), ' and ', -3, 0 ), ' seconds', -1, 1 )
   );
-  dsm( $params );
+  //dsm( $params );
   
-  drupal_mail( 'import_auction', 'bid_made', 'justin.hellings@gmail.com', language_default(), $params );
+  $recipients = variable_get('site_mail', '' ) . ', ' . $user->mail;
+  dsm ( $recipients );
+//  drupal_mail( 'import_auction', 'bid_made', $recipients, language_default(), $params );
 }
 
 /**
@@ -452,6 +455,7 @@ function import_auction_mail( $key, &$message, $params ) {
       $message['body'][] = 'A bid was made on the ' . $params['site_name'] .
         " website. Here are the details:\n\n" .
         "User:\t\t" . $params['user_login'] . "\n" .
+        "User email:\t" . $params['user_email'] . "\n" .
         "Link to user:\t" . $params['user_page'] . "\n" .
         "Lot number:\t" . $params['lot_number'] . "\n" .
         "Link to lot:\t" . $params['lot_page'] . "\n" .
@@ -461,7 +465,7 @@ function import_auction_mail( $key, &$message, $params ) {
         
       break;
   }
-  dsm( $message );
+  //dsm( $message );
 }
 
 // @todo : Add bidding webform (block in content area?) to lot and have
