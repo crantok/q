@@ -455,7 +455,7 @@ function import_auction_mail( $key, &$message, $params ) {
         "Link to user:\t" . $params['user_page'] . "\n" .
         "Lot number:\t" . $params['lot_number'] . "\n" .
         "Link to lot:\t" . $params['lot_page'] . "\n" .
-        'Bid amount:\t £' . $params['bid_amount'] . "\n" .
+        "Bid amount:\t£" . $params['bid_amount'] . "\n" .
         "Bit time:\t" . $params['bid_time']
       ;
         
