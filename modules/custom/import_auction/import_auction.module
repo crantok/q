@@ -432,7 +432,7 @@ function _import_auction_bid_form_submit( &$form, &$form_state ) {
     'lot_number' => $lot->title,
     'lot_page' => url( 'node/' . $lot->nid, array( 'absolute' => TRUE ) ),
     'bid_amount' => $form_state['values']['bid-amount'],
-    'bid_time' => substr_replace( substr_replace( date( 'jS F H:is ' ), ' and ', -3, 0 ), ' seconds', -1, 1 )
+    'bid_time' => substr_replace( substr_replace( date( 'jS F, H:is ' ), ' and ', -3, 0 ), ' seconds', -1, 1 )
   );
   dsm( $params );
   
