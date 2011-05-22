@@ -451,12 +451,12 @@ function import_auction_mail( $key, &$message, $params ) {
 
       $message['body'][] = 'A bid was made on the ' . $params['site_name'] .
         " website. Here are the details:\n\n" .
-        'User: ' . $params['user_login'] . "\n" .
-        'Link to user: ' . $params['user_page'] . "\n" .
-        'Lot number: ' . $params['lot_number'] . "\n" .
-        'Link to lot: ' . $params['lot_page'] . "\n" .
-        'Bid amount: £' . $params['bid_amount'] . "\n" .
-        'Bit time: ' . $params['bid_time']
+        "User:\t" . $params['user_login'] . "\n" .
+        "Link to user:\t" . $params['user_page'] . "\n" .
+        "Lot number:\t" . $params['lot_number'] . "\n" .
+        "Link to lot:\t" . $params['lot_page'] . "\n" .
+        'Bid amount:\t£' . $params['bid_amount'] . "\n" .
+        "Bit time:\t" . $params['bid_time']
       ;
         
       break;
