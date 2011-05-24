@@ -4,7 +4,7 @@ define('IMPORT_AUCTION_FILE_ELEMENT_NAME', 'upload');
 define('IMPORT_AUCTION_SUBPATH', 'auction_import');
 
 function import_auction_perm() {
-  return array( 'import auction', 'bid on auction lot' );
+  return array( 'import auction' );
 }
   
 function import_auction_menu() {
@@ -32,17 +32,6 @@ function import_auction_menu() {
 
     'access arguments' => array( 'import auction' ),
 
-  );
-  
-  // Auction lot specific page for bidding.
-  // Loading params using node_load. (Auction required for title.)
-  $items['auction/%node/bid/%node'] = array(
-    'type' => MENU_CALLBACK,
-    'title callback' => '_import_auction_bid_page_title',
-    'title arguments' => array(1,3),
-    'page callback' => '_import_auction_bid_page',
-    'page arguments' => array(1,3),
-    'access arguments' => array( 'bid on auction lot' ),
   );
   
   return $items;
@@ -328,17 +317,17 @@ function _import_auction_insert_lot_node( $lot, $auction_nid ) {
   $node->field_lot_description[0]['value'] = $lot->description;
   $node->field_lot_auction[0]['nid'] = $auction_nid;
 
-  if ( ! isset( $junk2 ) ) {
-    dsm( $node );
-    $junk2 = 1;
-  }
+  //if ( ! isset( $junk2 ) ) {
+    //dsm( $node );
+    //$junk2 = 1;
+  //}
         
-  node_save($node);
+  //node_save($node);
 
-  if ( ! isset( $junk3 ) ) {
-    dsm( $node );
-    $junk3 = 1;
-  }
+  //if ( ! isset( $junk3 ) ) {
+    //dsm( $node );
+    //$junk3 = 1;
+  //}
 
   if ( ! $node->nid ){
     drupal_set_message(t('There was a problem creating lot ') . $lot->number, 'error' );
@@ -346,138 +335,13 @@ function _import_auction_insert_lot_node( $lot, $auction_nid ) {
 }
 
 
-//function _import_auction_auction_load( $nid ) {
-  //return node_load
-//}
+// @elegance : change bidding form to be in a block. Add block to content-region
+// of auction_lot view. (This way we don't need to define our own rendering, nor
+// use an ugly edit link. Can just hide, rename and add node related stuff
+// using: hook_nodeapi $op=view
 
-//function _import_auction_lot_load( $nid ) {
-//}
-
-function _import_auction_bid_page_title( $auction, $lot ) {
-  return t(
-    'Bid on lot @lot_number in auction @auction_number. Auction ends @end_time.',
-    array(
-      '@lot_number' => $lot->title,
-      '@auction_number' => $auction->title,
-      '@end_time' => format_date(
-        strtotime( $auction->field_auction_end_time[0]['value'] ),
-        'large'
-      ),
-    )
-  );
-}
-
-function _import_auction_bid_page( $auction, $lot ) {
-
-//  return node_view( $lot, false, false, false ); // to much crap, inc title.
-//  return '<br/><br/><br/><h1>------------------- TO DO -------------------</h1>';
-  
-  $page = '';
-  $page .= '<div class="bid-page-lot">';
-  $page .= '<div class="field-lot-description field-lot-item">';
-  $page .= check_plain( $lot->field_lot_description[0]['value'] );
-  $page .= '</div>';
-  $page .= '<div class="field-lot-category field-lot-item">';
-  foreach ( $lot->field_lot_category as $category ) {
-    $page .= '<div class="field-lot-category-item">';
-    $page .= check_plain( $category['value'] );
-    $page .= '</div>';
-  }
-  $page .= '</div>'; // class="field-lot-category"
-  $page .= '<div class="field-lot-price field-lot-item">';
-  $page .= check_plain( '£' . $lot->field_lot_price[0]['value'] );
-  $page .= '</div>';
-  $page .= '</div>'; // class="bid-page-lot"
-  
-  $page .= drupal_get_form( '_import_auction_bid_form' );
-  
-  return $page;
-}
-
-function _import_auction_bid_form() {
-  
-  $form = array();
-  
-  $form['bid-amount'] = array(
-    '#type' => 'textfield',
-    '#title' => 'Bid amount, in pounds sterling (£)',
-  );
-  
-  $form['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Register bid'),
-  );
-  
-  return $form;
-}
-
-function _import_auction_bid_form_validate( &$form, &$form_state ) {
-  
-  if ( ! is_numeric( $form_state['values']['bid-amount'] ) ) {
-    form_set_error( 'bid-amount', 'Please enter a valid bid amount' );
-  }
-}
-
-function _import_auction_bid_form_submit( &$form, &$form_state ) {
-
-  global $user;
-  $lot = node_load( arg(3) );
-  
-  // send email from user to site admin, and CC user.
-  
-  $params = array (
-    'site_name' => variable_get( 'site_name', 'Quest'),
-    'user_login' => $user->name,
-    'user_email' => $user->mail,
-    'user_page' => url( 'user/' . $user->uid, array( 'absolute' => TRUE ) ),
-    'lot_number' => $lot->title,
-    'lot_page' => url( 'node/' . $lot->nid, array( 'absolute' => TRUE ) ),
-    'bid_amount' => $form_state['values']['bid-amount'],
-    'bid_time' => substr_replace( substr_replace( date( 'jS F, H:is ' ), ' and ', -3, 0 ), ' seconds', -1, 1 )
-  );
-  //dsm( $params );
-  
-  $recipients = variable_get('site_mail', '' ) . ', ' . $user->mail;
-  dsm ( $recipients );
-//  drupal_mail( 'import_auction', 'bid_made', $recipients, language_default(), $params );
-}
-
-/**
- * Implements hook_mail()
- */
-function import_auction_mail( $key, &$message, $params ) {
-  switch ( $key ) {
-    case 'bid_made':
-
-      $message['subject'] = $params['site_name'] .
-        ' website: Bid made on lot number ' . $params['lot_number'];
-
-      $message['body'][] = 'A bid was made on the ' . $params['site_name'] .
-        " website. Here are the details:\n\n" .
-        "User:\t\t" . $params['user_login'] . "\n" .
-        "User email:\t" . $params['user_email'] . "\n" .
-        "Link to user:\t" . $params['user_page'] . "\n" .
-        "Lot number:\t" . $params['lot_number'] . "\n" .
-        "Link to lot:\t" . $params['lot_page'] . "\n" .
-        "Bid amount:\t£" . $params['bid_amount'] . "\n" .
-        "Bit time:\t" . $params['bid_time']
-      ;
-        
-      break;
-  }
-  //dsm( $message );
-}
-
-// @todo : Add bidding webform (block in content area?) to lot and have
-//         it email admin when submitted
-// @todo : Maybe the link to the bidding webform is from a text/link field
-//         in the view and the form is prepopulated for the lot.
 // @todo : Flesh out a content profile to gather information at registration
-// @todo : 
-// @todo : 
 
-// @bonus : Add image field to lot
-// @bonus : Add ability for admin to delete lots for a given auction
 // @bonus : Report for customer - see bids they've made
 // @bonus : Report for admin - see winning bids for each lot (bid time is v. important)
 

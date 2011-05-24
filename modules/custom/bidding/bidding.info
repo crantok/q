@@ -1,0 +1,7 @@
+; $Id$
+
+name = Bidding
+description = Allow users to bid on lots
+package = Quest
+core = 6.x
+

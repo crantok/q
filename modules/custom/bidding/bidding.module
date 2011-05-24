@@ -1,0 +1,206 @@
+<?php
+
+/**
+ * Implementes hook_perm()
+ */
+function bidding_perm() {
+  return array( 'bid on auction lot' );
+}
+
+/**
+ * Implements hook_block()
+ */  
+function bidding_block($op = 'list', $delta = '', $edit = array()) {
+
+  switch ($op) {
+
+    case 'list':
+      $blocks['make-bid'] = array(
+        'info'       => t('Bid on an auction lot'),
+      );
+      return $blocks;
+
+    case 'configure':
+      // return form for config if necessary
+    break;
+
+    case 'save':
+      // deal with a submitted config form. Details are in the $edit variable.
+    break;
+
+    case 'view':
+      switch ($delta) {
+        case 'make-bid':
+        
+          if ( $lot = _bidding_get_current_lot_node() ) {
+            $auction = node_load( $lot->field_lot_auction[0]['nid'] );
+            $block['subject'] = _bidding_form_block_subject( $lot, $auction );
+            $block['content'] = _bidding_form_block_content( $lot, $auction );
+          }
+          else {
+            drupal_set_message(
+              'Tried to show bidding block on non-auction-lot page.', 'error' );
+          }
+          
+        break;
+      }
+      return $block;
+  }
+}
+
+/**
+ * Get the current auction lot.
+ * 
+ * @return
+ *   An auction_lot node, else NULL
+ */
+function _bidding_get_current_lot_node() {
+  
+  // Are we not on a node page at all?
+  if ( arg(0) != 'node' || ! is_numeric( $lot_nid = arg(1) ) ) {
+    return NULL;
+  }
+  
+  $lot = node_load( $lot_nid );
+  
+  // Are we on the correct kind of node page?
+  return ( $lot->type == 'auction_lot' ) ? $lot : NULL;
+}
+  
+/**
+ * Subject text for bidding-form block.
+ * 
+ * @param
+ *   A string containing subject text.
+ */
+function _bidding_form_block_subject( $lot, $auction ) {
+
+  if ( strtotime( $auction->field_auction_end_time[0]['value'] ) < time() ) {
+    return '';
+  }
+  else {
+    $timestamp = strtotime( $auction->field_auction_end_time[0]['value'] );
+    return
+      t( 'Bidding on this item ends on' ) . ' ' . date( 'l jS F Y', $timestamp );
+  }
+}
+
+/**
+ * Content of bidding-form block.
+ * 
+ * @return
+ *   A string containing content of the block.
+ */
+function _bidding_form_block_content( $lot, $auction ) {
+
+  if ( strtotime( $auction->field_auction_end_time[0]['value'] ) < time() ) {
+    return t( 'Bidding has ended for this item.' );
+  }
+  else {
+    return drupal_get_form( '_bidding_form' );
+  }
+}
+
+function _bidding_form() {
+  
+  $form = array();
+  
+  $form['bid-amount'] = array(
+    '#type' => 'textfield',
+    '#title' => 'Bid amount, in pounds sterling (£)',
+  );
+  
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Register bid'),
+  );
+  
+  return $form;
+}
+
+function _bidding_form_validate( &$form, &$form_state ) {
+  
+  if ( ! is_numeric( $form_state['values']['bid-amount'] ) ) {
+    form_set_error( 'bid-amount', 'Please enter a valid bid amount' );
+  }
+}
+
+/**
+ * Submit callback for bidding_form.
+ * 
+ * Send an email with details of the bid, to the bidder and site email address.
+ */
+function _bidding_form_submit( &$form, &$form_state ) {
+
+  global $user;
+  $lot = _bidding_get_current_lot_node();
+
+  $params = array (
+    'site_name' => variable_get( 'site_name', 'Quest'),
+    'user_login' => $user->name,
+    'user_email' => $user->mail,
+    'user_page' => url( 'user/' . $user->uid, array( 'absolute' => TRUE ) ),
+    'lot_number' => $lot->title,
+    'lot_page' => url( 'node/' . $lot->nid, array( 'absolute' => TRUE ) ),
+    'bid_amount' => $form_state['values']['bid-amount'],
+    //'bid_time' => substr_replace( substr_replace( date( 'jS F, H:is ' ), ' and ', -3, 0 ), ' seconds', -1, 1 )
+  );
+  //dsm( $params );
+  
+  $recipients = variable_get('site_mail', '' ) . ', ' . $user->mail;
+  //dsm ( $recipients );
+  drupal_mail( 'bidding', 'bid_made', $recipients, language_default(), $params );
+}
+
+/**
+ * Implements hook_mail()
+ */
+function bidding_mail( $key, &$message, $params ) {
+  switch ( $key ) {
+    
+    case 'bid_made': // Compose message containing details of a bid.
+
+      $message['subject'] = $params['site_name'] .
+        ' website: Bid made on lot number ' . $params['lot_number'];
+
+      $message['body'][] = 'A bid was made on the ' . $params['site_name'] .
+        " website. Here are the details:\n\n" .
+        "User:\t\t" . $params['user_login'] . "\n" .
+        "User email:\t" . $params['user_email'] . "\n" .
+        "Link to user:\t" . $params['user_page'] . "\n" .
+        "Lot number:\t" . $params['lot_number'] . "\n" .
+        "Link to lot:\t" . $params['lot_page'] . "\n" .
+        "Bid amount:\t£" . $params['bid_amount']
+        // . "\n" . "Bit time:\t" . $params['bid_time']
+      ;
+        
+      break;
+  }
+  //dsm( $message );
+}
+
+// @elegance : change bidding form to be in a block. Add block to content-region
+// of auction_lot view. (This way we don't need to define our own rendering, nor
+// use an ugly edit link. Can just hide, rename and add node related stuff
+// using: hook_nodeapi $op=view
+
+// @todo : Flesh out a content profile to gather information at registration
+
+// @bonus : Report for customer - see bids they've made
+// @bonus : Report for admin - see winning bids for each lot (bid time is v. important)
+
+
+
+
+//function bidding_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
+  //if ( $op === 'view' ) {
+    //dsm( $node );
+  //}
+//}
+
+
+
+
+
+
+
