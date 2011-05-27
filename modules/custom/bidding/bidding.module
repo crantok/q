@@ -53,6 +53,10 @@ function bidding_block($op = 'list', $delta = '', $edit = array()) {
     case 'list':
       $blocks['make-bid'] = array(
         'info'       => t('Bid on an auction lot'),
+        'status'     => 1,
+        'region'     => 'content_bottom',
+        'visibility' => 1,  // Show on only the listed pages
+        'pages'      => 'lot/*',
       );
       return $blocks;
 
@@ -218,10 +222,8 @@ function bidding_mail( $key, &$message, $params ) {
   //dsm( $message );
 }
 
-// @elegance : change bidding form to be in a block. Add block to content-region
-// of auction_lot view. (This way we don't need to define our own rendering, nor
-// use an ugly edit link. Can just hide, rename and add node related stuff
-// using: hook_nodeapi $op=view
+// @todo : Things that did not get added to online_bidding feature:
+// - block visibility settings - don't want to show menu sidebar blocks on /auction/*/search-lots
 
 // @todo : Flesh out a content profile to gather information at registration
 

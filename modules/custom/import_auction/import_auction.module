@@ -335,19 +335,6 @@ function _import_auction_insert_lot_node( $lot, $auction_nid ) {
 }
 
 
-// @elegance : change bidding form to be in a block. Add block to content-region
-// of auction_lot view. (This way we don't need to define our own rendering, nor
-// use an ugly edit link. Can just hide, rename and add node related stuff
-// using: hook_nodeapi $op=view
-
-// @todo : Flesh out a content profile to gather information at registration
-
-// @bonus : Report for customer - see bids they've made
-// @bonus : Report for admin - see winning bids for each lot (bid time is v. important)
-
-
-
-
 //function import_auction_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
   //if ( $op === 'view' ) {
     //dsm( $node );
