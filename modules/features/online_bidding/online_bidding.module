@@ -1,0 +1,3 @@
+<?php
+
+include_once('online_bidding.features.inc');
