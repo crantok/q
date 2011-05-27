@@ -322,7 +322,7 @@ function _import_auction_insert_lot_node( $lot, $auction_nid ) {
     //$junk2 = 1;
   //}
         
-  //node_save($node);
+  node_save($node);
 
   //if ( ! isset( $junk3 ) ) {
     //dsm( $node );
