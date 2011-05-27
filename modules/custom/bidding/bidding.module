@@ -4,7 +4,43 @@
  * Implementes hook_perm()
  */
 function bidding_perm() {
-  return array( 'bid on auction lot' );
+  return array( 'search auction lots', 'bid on auction lot' );
+}
+
+/**
+ * Implements hook_menu()
+ */
+function bidding_menu() {
+
+  $items['search-auction-lots'] = array(
+
+    // The title - do NOT use t() as t() is called automatically.
+    'title' => 'Search auction lots',
+
+    // Description (hover flyover for menu link). Does NOT use t(), which is
+    // called automatically.
+    'description' => 'Search lots in the current auction',
+
+    // Function to be called when this path is accessed.
+    'page callback' => '_bidding_search_lots',
+
+    'access arguments' => array( 'search auction lots' ),
+    'menu_name' => 'primary-links',
+    'weight' => -48,
+  );
+  
+  return $items;
+}
+
+/**
+ * Page callback for searching lots.
+ */
+function _bidding_search_lots() {
+  $auction = views_get_view_result( 'latest_auction' );
+//dsm( $auction );
+  $path = 'auction/' . $auction[0]->nid . '/search-lots';
+//dsm( $path );
+  drupal_goto( $path );
 }
 
 /**
@@ -150,6 +186,9 @@ function _bidding_form_submit( &$form, &$form_state ) {
   $recipients = variable_get('site_mail', '' ) . ', ' . $user->mail;
   //dsm ( $recipients );
   drupal_mail( 'bidding', 'bid_made', $recipients, language_default(), $params );
+  
+  drupal_set_message( 'You have registered a bid on lot ' . $lot->title .
+    '. You should soon receive an email confirming this.' );
 }
 
 /**
@@ -192,11 +231,15 @@ function bidding_mail( $key, &$message, $params ) {
 
 
 
-//function bidding_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
-  //if ( $op === 'view' ) {
-    //dsm( $node );
-  //}
-//}
+function bidding_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
+  if ( $op === 'view' ) {
+//    dsm( $node );
+    
+    if ( $node->type == 'auction_lot' ) {
+      drupal_set_title( 'Lot number ' . $node->title );
+    }
+  }
+}
 
 
 
