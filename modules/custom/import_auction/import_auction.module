@@ -28,7 +28,7 @@ function import_auction_menu() {
 
     // Arguments to the page callback. Here's we'll use them just to provide
     // content for our page.
-    'page arguments' => array( 'import_auction_upload_form' ),
+    'page arguments' => array( '_import_auction_upload_form' ),
 
     'access arguments' => array( 'import auction' ),
 
