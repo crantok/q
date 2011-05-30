@@ -69,3 +69,12 @@
   margin: 5px 0 0 0;
 }
 
+.node-type-profile .field-field-profile-honorific,
+.node-type-profile .field-field-profile-fname {
+  float: left;
+  margin: 0 0.6% 0 0;
+}
+
+.node-type-profile .field-label {
+  margin: 1% 0 0 0;
+}
