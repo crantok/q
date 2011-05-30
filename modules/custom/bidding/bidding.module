@@ -72,6 +72,12 @@ function bidding_block($op = 'list', $delta = '', $edit = array()) {
       switch ($delta) {
         case 'make-bid':
         
+          // Don't show block if user does not have permission to bid.
+          // Unfortunately, can't do this in blocks screen. What about Context?
+          if ( ! user_access( 'bid on auction lot' ) ) {
+            break;
+          }
+        
           if ( $lot = _bidding_get_current_lot_node() ) {
             $auction = node_load( $lot->field_lot_auction[0]['nid'] );
             $block['subject'] = _bidding_form_block_subject( $lot, $auction );
@@ -224,9 +230,10 @@ function bidding_mail( $key, &$message, $params ) {
 
 // @todo : Things that did not get added to online_bidding feature:
 // - block visibility settings - don't want to show menu sidebar blocks on /auction/*/search-lots
+// - permissions - auth user needs to have all the premissions that anon user has
 
-// @todo : Flesh out a content profile to gather information at registration
-
+// @bonus : Add simplenews to replace mailchimp (simple interface for Alec)
+// @bonus : auto-clear-up or manual delete of old lot data
 // @bonus : Report for customer - see bids they've made
 // @bonus : Report for admin - see winning bids for each lot (bid time is v. important)
 
