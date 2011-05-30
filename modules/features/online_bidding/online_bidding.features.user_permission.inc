@@ -27,6 +27,7 @@ function online_bidding_user_default_permissions() {
     'name' => 'search auction lots',
     'roles' => array(
       '0' => 'anonymous user',
+      '1' => 'authenticated user',
     ),
   );
 
