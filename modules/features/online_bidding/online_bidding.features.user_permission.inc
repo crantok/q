@@ -9,7 +9,9 @@ function online_bidding_user_default_permissions() {
   // Exported permission: bid on auction lot
   $permissions['bid on auction lot'] = array(
     'name' => 'bid on auction lot',
-    'roles' => array(),
+    'roles' => array(
+      '0' => 'authenticated user',
+    ),
   );
 
   // Exported permission: import auction
@@ -23,7 +25,9 @@ function online_bidding_user_default_permissions() {
   // Exported permission: search auction lots
   $permissions['search auction lots'] = array(
     'name' => 'search auction lots',
-    'roles' => array(),
+    'roles' => array(
+      '0' => 'anonymous user',
+    ),
   );
 
   return $permissions;
