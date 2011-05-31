@@ -197,8 +197,12 @@ function _bidding_form_submit( &$form, &$form_state ) {
   //dsm ( $recipients );
   drupal_mail( 'bidding', 'bid_made', $recipients, language_default(), $params );
   
-  drupal_set_message( 'You have registered a bid on lot ' . $lot->title .
-    '. You should soon receive an email confirming this.' );
+  drupal_set_message(
+    sprintf( 'You have registered a bid of £%.2f on lot %s. ',
+      $params['bid_amount'], $lot->title
+    )
+    . 'You should soon receive an email confirming this.'
+  );
 }
 
 /**
@@ -231,6 +235,7 @@ function bidding_mail( $key, &$message, $params ) {
 // @todo : Things that did not get added to online_bidding feature:
 // - block visibility settings - don't want to show menu sidebar blocks on /auction/*/search-lots
 // - permissions - auth user needs to have all the premissions that anon user has
+// - turning off post details in the global theme configuration
 
 // @bonus : Add simplenews to replace mailchimp (simple interface for Alec)
 // @bonus : auto-clear-up or manual delete of old lot data
