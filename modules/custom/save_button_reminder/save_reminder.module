@@ -1,0 +1,30 @@
+<?php
+
+/**
+ * Implements hook_form_alter()
+ */
+function save_reminder_form_alter( &$form, &$form_state, $form_id ) {
+
+  if ( substr( $form_id, -10 ) == '_node_form'
+       || $form_id == 'user_profile_form' ) {
+
+    $form = array_merge( _save_reminder_get_form_item_array(), $form );
+  }
+}
+
+/**
+ * Get the form element array( key => form item ) to a relevant form.
+ * 
+ * Abstracted this because I was using form-id-specific hook functions.
+ */
+function _save_reminder_get_form_item_array() {
+  return array(
+    'save-reminder' => array(
+      '#type' => 'item',
+      '#value' => '<h3>When you have finished, scroll to the bottom of the page and click on "Save".</h3>',
+      '#prefix' => '<div class="save-reminder">',
+      '#suffix' => '</div>',
+      '#weight' => -99, // Make sure this ia lways the first element
+    ),
+  );
+}

@@ -1,0 +1,7 @@
+; $Id$
+
+name = Save reminder
+description = On various forms, reminds user to press save after making changes.
+package = Custom
+core = 6.x
+
