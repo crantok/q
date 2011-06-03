@@ -6,7 +6,7 @@
 function save_reminder_form_alter( &$form, &$form_state, $form_id ) {
 
   if ( substr( $form_id, -10 ) == '_node_form'
-       || $form_id == 'user_profile_form' ) {
+       || $form_id == 'user_profile_form' || $form_id == 'user_register' ) {
 
     $form = array_merge( _save_reminder_get_form_item_array(), $form );
   }
