@@ -72,46 +72,53 @@ function bidding_block($op = 'list', $delta = '', $edit = array()) {
       switch ($delta) {
         case 'make-bid':
         
-          // Don't show block if user does not have permission to bid.
-          // Unfortunately, can't do this in blocks screen. What about Context?
-          if ( ! user_access( 'bid on auction lot' ) ) {
-            break;
-          }
-        
-          if ( $lot = _bidding_get_current_lot_node() ) {
-            $auction = node_load( $lot->field_lot_auction[0]['nid'] );
-            $block['subject'] = _bidding_form_block_subject( $lot, $auction );
-            $block['content'] = _bidding_form_block_content( $lot, $auction );
+          if ( user_access( 'bid on auction lot' ) ) {
+            $lot = _bidding_get_current_lot_node();
+            if ( $lot ) {
+              $auction = node_load( $lot->field_lot_auction[0]['nid'] );
+              $block['subject'] = _bidding_form_block_subject( $lot, $auction );
+              $block['content'] = _bidding_form_block_content( $lot, $auction );
+            }
+            else {
+              drupal_set_message(
+                'Tried to show bidding block on non-auction-lot page.', 'error' );
+            }
           }
           else {
-            drupal_set_message(
-              'Tried to show bidding block on non-auction-lot page.', 'error' );
+            $block['subject'] = '';
+            $block['content'] =
+              t('<strong>Please <a href="/user">log in</a> if you want to place bids.</strong>');
           }
-          
         break;
       }
       return $block;
   }
 }
 
-/**
- * Get the current auction lot.
- * 
- * @return
- *   An auction_lot node, else NULL
- */
 function _bidding_get_current_lot_node() {
   
-  // Are we not on a node page at all?
-  if ( arg(0) != 'node' || ! is_numeric( $lot_nid = arg(1) ) ) {
-    return NULL;
+  $nid = _bidding_get_current_node_id();
+  
+  if ( $nid ) {
+    $node = node_load( $nid );
+    if ( $node->type == 'auction_lot' ) {
+      return $node;
+    }
   }
   
-  $lot = node_load( $lot_nid );
-  
-  // Are we on the correct kind of node page?
-  return ( $lot->type == 'auction_lot' ) ? $lot : NULL;
+  return NULL;
 }
+
+function _bidding_get_current_node_id() {
+
+  if ( arg(0) == 'node' && is_numeric( arg(1) ) ) {
+    return arg(1);
+  }
+  else {
+    return NULL;
+  }
+}
+
   
 /**
  * Subject text for bidding-form block.
