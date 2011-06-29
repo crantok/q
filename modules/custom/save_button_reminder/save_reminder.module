@@ -24,7 +24,7 @@ function _save_reminder_get_form_item_array() {
       '#value' => '<h3>When you have finished, scroll to the bottom of the page and click on "Save".</h3>',
       '#prefix' => '<div class="save-reminder">',
       '#suffix' => '</div>',
-      '#weight' => -99, // Make sure this ia lways the first element
+      '#weight' => -99, // Make sure this is always the first element
     ),
   );
 }
