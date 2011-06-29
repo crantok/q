@@ -165,7 +165,7 @@ function _bidding_form() {
   
   $form['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Register bid'),
+    '#value' => t('Save bid'),
   );
   
   return $form;
@@ -184,8 +184,49 @@ function _bidding_form_validate( &$form, &$form_state ) {
  * Send an email with details of the bid, to the bidder and site email address.
  */
 function _bidding_form_submit( &$form, &$form_state ) {
-
   global $user;
+  $lot = _bidding_get_current_lot_node();
+  $amount = $form_state['values']['bid-amount'];
+  
+  $prev_bid = _bidding_get_saved_bid( $user->uid, $lot->nid );
+  
+  if ( _bidding_save_bid( $user->uid, $lot->nid, $amount ) ) {
+    $args = array( '@lotnum' => $lot->title, '@bidamt' => $amount );
+    
+    if ( $prev_bid ) {
+      drupal_set_message( t(
+        "Your saved bid for lot @lotnum has been changed to £@bidamt", $args ) );
+    }
+    else {
+      drupal_set_message( t(
+        "Your bid of £@bidamt for lot @lotnum has been saved.", $args ) );
+    }
+    
+    drupal_set_message( t( 'When you have finished bidding, ' .
+      'you can <a href="/confirm-bids">confirm your saved bids</a>.' ) );
+  }
+  else {
+    drupal_set_message( t( 'We are sorry. There was a problem registering your bid' ) );
+  }
+}
+
+function _bidding_get_saved_bid( $uid, $lot_nid ) {
+  $sql = 'SELECT * FROM bidding_basket WHERE uid = %d AND nid = %d';
+  $query_result = db_query( $sql, $uid, $lot_nid );
+  $rows = array();
+  while ( $row = db_fetch_object( $query_result ) ) {
+    $rows[] = $row;
+  }
+  return count( $rows ) ? $rows[0] : NULL;
+}
+  
+function _bidding_save_bid( $uid, $lot_nid, $amount ) {
+  $sql = 'REPLACE INTO bidding_basket ( uid, nid, amount ) VALUES ( %d, %d, %f )';
+  return db_query( $sql, $uid, $lot_nid, $amount );
+}
+
+
+/*  global $user;
   $lot = _bidding_get_current_lot_node();
 
   $params = array (
@@ -211,6 +252,7 @@ function _bidding_form_submit( &$form, &$form_state ) {
     . 'You should soon receive an email confirming this.'
   );
 }
+*/
 
 /**
  * Implements hook_mail()
