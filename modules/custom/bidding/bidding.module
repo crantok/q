@@ -29,6 +29,37 @@ function bidding_menu() {
     'weight' => -48,
   );
   
+  $items['saved-bids'] = array(
+
+    // The title - do NOT use t() as t() is called automatically.
+    'title' => 'Saved bids',
+
+    // Description (hover flyover for menu link). Does NOT use t(), which is
+    // called automatically.
+    'description' => 'See saved bids and confirm',
+
+    // Function to be called when this path is accessed.
+    'page callback' => '_bidding_current_user_saved_bids',
+
+    'access arguments' => array( 'bid on auction lot' ),
+  );
+  
+  //$items['user/%/saved-bids'] = array(
+
+    //// The title - do NOT use t() as t() is called automatically.
+    //'title' => 'Saved bids',
+
+    //// Description (hover flyover for menu link). Does NOT use t(), which is
+    //// called automatically.
+    //'description' => 'See saved bids and confirm',
+
+    //// Function to be called when this path is accessed.
+    //'page callback' => '_bidding_saved_bids',
+    //'page arguments' => array(1),
+
+    //'access callback' => '_see_user_saved_bids',
+  //);
+  
   return $items;
 }
 
@@ -41,6 +72,86 @@ function _bidding_search_lots() {
   $path = 'auction/' . $auction[0]->nid . '/search-lots';
 //dsm( $path );
   drupal_goto( $path );
+}
+
+/**
+ * Page callback for viewing and confirming saved bids.
+ */
+function _bidding_current_user_saved_bids() {
+  global $user;
+  $bids = _bidding_get_saved_bids_by_user( $user->uid );
+
+  // truncate auction lot descriptions
+  foreach ( $bids as &$bid ) {
+    if ( strlen( $bid['description'] ) > 60 ) {
+      $bid['description'] = substr( $bid['description'], 0, 50 ) . '...';
+    }
+  }
+
+  $html = theme( 'table',
+    array( t('Lot number'), t('Lot description'), t('Bid amount') ),
+    $bids
+  );
+  
+  $html .= drupal_get_form( '_bidding_confirm_saved_bids_form', $bids );
+
+  return $html;
+}
+
+/**
+ *
+ */
+function _bidding_confirm_saved_bids_form( $dummy, $bids ) {
+
+  $form = array();
+
+  $form['bids'] = array(
+    '#type' => 'value',
+    '#value' => $bids,
+  );
+    
+  $form['explanation'] = array(
+    '#type' => 'item',
+    '#value' =>
+      'If you are sure that these are the bids you want to make, then you can <b>Confirm</b> them.<br/>' .
+      'On confirming your saved bids, a copy will be emailed to Quest and another to yourself.',
+  );
+  
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Confirm these bids'),
+  );
+  
+  return $form;
+}
+
+function _bidding_confirm_saved_bids_form_submit( &$form, &$form_state ) {
+
+  global $user;
+
+  $recipients = variable_get('site_mail', '' ) . ', ' . $user->mail;
+  //dsm ( $recipients );
+
+  $params = array (
+    'site_name' => variable_get( 'site_name', 'Quest'),
+    'user_login' => $user->name,
+    'user_email' => $user->mail,
+    'user_page' => url( 'user/' . $user->uid, array( 'absolute' => TRUE ) ),
+    'bids' => $form_state['values']['bids'],
+  );
+  //dsm( $params );
+  
+  $message = drupal_mail( 'bidding', 'bids_confirmed', $recipients, language_default(), $params );
+  dsm( $message );
+  
+  if ( $message['result'] ) {
+    drupal_set_message(
+      'Your bids have been confirmed. You should receive an email shortly.' );
+    _bidding_delete_saved_bids_by_user( $user->uid );
+  }
+  else {
+    // Do nothing - mail system should show an error message to user.
+  }    
 }
 
 /**
@@ -206,11 +317,38 @@ function _bidding_form_submit( &$form, &$form_state ) {
       'you can <a href="/confirm-bids">confirm your saved bids</a>.' ) );
   }
   else {
-    drupal_set_message( t( 'We are sorry. There was a problem registering your bid' ) );
+    drupal_set_message( t( 'We are sorry. There was a problem saving your bid' ) );
   }
 }
 
+/**
+ * Get saved bids for a specific user.
+ * 
+ * @param $uid
+ *   User id from the {users} table.
+ * @param $lot_nid
+ *   The node ID (from the {node} table) of an auction lot.
+ * 
+ * @return
+ *   An array of bids. Each bid is also an array.
+ */
+function _bidding_get_saved_bids_by_user( $uid ) {
+
+  $sql = 'SELECT n.title number, l.field_lot_description_value description, b.amount ' .
+    'FROM {bidding_basket} b JOIN {node} n ON b.nid = n.nid ' .
+    'JOIN {content_type_auction_lot} l ON n.vid = l.vid ' .
+    'WHERE b.uid = %d';
+  
+  $query_result = db_query( $sql, $uid );
+  $rows = array();
+  while ( $row = db_fetch_array( $query_result ) ) {
+    $rows[] = $row;
+  }
+  return $rows;
+}
+  
 function _bidding_get_saved_bid( $uid, $lot_nid ) {
+
   $sql = 'SELECT * FROM bidding_basket WHERE uid = %d AND nid = %d';
   $query_result = db_query( $sql, $uid, $lot_nid );
   $rows = array();
@@ -225,34 +363,9 @@ function _bidding_save_bid( $uid, $lot_nid, $amount ) {
   return db_query( $sql, $uid, $lot_nid, $amount );
 }
 
-
-/*  global $user;
-  $lot = _bidding_get_current_lot_node();
-
-  $params = array (
-    'site_name' => variable_get( 'site_name', 'Quest'),
-    'user_login' => $user->name,
-    'user_email' => $user->mail,
-    'user_page' => url( 'user/' . $user->uid, array( 'absolute' => TRUE ) ),
-    'lot_number' => $lot->title,
-    'lot_page' => url( 'node/' . $lot->nid, array( 'absolute' => TRUE ) ),
-    'bid_amount' => $form_state['values']['bid-amount'],
-    //'bid_time' => substr_replace( substr_replace( date( 'jS F, H:is ' ), ' and ', -3, 0 ), ' seconds', -1, 1 )
-  );
-  //dsm( $params );
-  
-  $recipients = variable_get('site_mail', '' ) . ', ' . $user->mail;
-  //dsm ( $recipients );
-  drupal_mail( 'bidding', 'bid_made', $recipients, language_default(), $params );
-  
-  drupal_set_message(
-    sprintf( 'You have registered a bid of £%.2f on lot %s. ',
-      $params['bid_amount'], $lot->title
-    )
-    . 'You should soon receive an email confirming this.'
-  );
+function _bidding_delete_saved_bids_by_user( $uid ) {
+//  db_query( 'DELETE FROM {bidding_basket} WHERE uid = %d', $uid );
 }
-*/
 
 /**
  * Implements hook_mail()
@@ -260,26 +373,31 @@ function _bidding_save_bid( $uid, $lot_nid, $amount ) {
 function bidding_mail( $key, &$message, $params ) {
   switch ( $key ) {
     
-    case 'bid_made': // Compose message containing details of a bid.
+    case 'bids_confirmed': // Compose message containing details of a bid.
 
       $message['subject'] = $params['site_name'] .
-        ' website: Bid made on lot number ' . $params['lot_number'];
+        ' website: ' . $params['user_login'] . ' has confirmed a set of bids';
 
-      $message['body'][] = 'A bid was made on the ' . $params['site_name'] .
-        " website. Here are the details:\n\n" .
+      $message['body'][0] =
+        $params['user_login'] . " has confirmed a set of bids on the " .
+        $params['site_name'] . " website. Here are the user details:\n\n" .
         "User:\t\t" . $params['user_login'] . "\n" .
         "User email:\t" . $params['user_email'] . "\n" .
-        "Link to user:\t" . $params['user_page'] . "\n" .
-        "Lot number:\t" . $params['lot_number'] . "\n" .
-        "Link to lot:\t" . $params['lot_page'] . "\n" .
-        "Bid amount:\t£" . $params['bid_amount']
-        // . "\n" . "Bit time:\t" . $params['bid_time']
+        "Link to user:\t" . $params['user_page'] . "\n\n" .
+        "And here are the bids:\n"
       ;
+
+      foreach ( $params['bids'] as $bid ) {  
+        $message['body'][0] .=
+          "\nLot number:\t" . $bid['number'] . ",\tBid amount:\t£" . $bid['amount'];
+      }
         
       break;
   }
   //dsm( $message );
+  return $message;
 }
+
 
 // @todo : Things that did not get added to online_bidding feature:
 // - block visibility settings - don't want to show menu sidebar blocks on /auction/*/search-lots

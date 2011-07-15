@@ -1,0 +1,53 @@
+<?php
+
+/**
+ * @file
+ * Installation for bidding module.
+ */
+
+/**
+ * Implements hook_install()
+ */
+function bidding_install() {
+  drupal_install_schema( 'bidding' );
+}
+
+/**
+ * Implements hook_schema()
+ */
+function bidding_schema() {
+  
+  $schema['bidding_basket'] = array (
+    'description' => 'Saved bids that have not yet been registered.',
+    'fields' => array(
+      'id' => array(
+        'description' => 'Bid ID',
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'uid' => array(
+        'description' => 'ID of user that made the bid.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'nid' => array(
+        'description' => 'Id of lot node being bid on.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'amount' => array(
+        'description' => 'Bid amount.',
+        'type' => 'float',
+        'not null' => TRUE,
+      ),
+    ),
+    'unique keys' => array(
+      'uid_nid' => array('uid', 'nid'), 
+    ), 
+    'primary key' => array('id'),
+  );
+
+  return $schema;
+}
