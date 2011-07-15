@@ -4,7 +4,7 @@
  * Implementes hook_perm()
  */
 function bidding_perm() {
-  return array( 'search auction lots', 'bid on auction lot' );
+  return array( 'search auction lots', 'bid on auction lot', 'administer bidding' );
 }
 
 /**
@@ -22,7 +22,7 @@ function bidding_menu() {
     'description' => 'Search lots in the current auction',
 
     // Function to be called when this path is accessed.
-    'page callback' => '_bidding_search_lots',
+    'page callback' => '_bidding_search_lots_page',
 
     'access arguments' => array( 'search auction lots' ),
     'menu_name' => 'primary-links',
@@ -39,26 +39,27 @@ function bidding_menu() {
     'description' => 'See saved bids and confirm',
 
     // Function to be called when this path is accessed.
-    'page callback' => '_bidding_current_user_saved_bids',
+    'page callback' => '_bidding_current_user_saved_bids_page',
 
     'access arguments' => array( 'bid on auction lot' ),
   );
   
-  //$items['user/%/saved-bids'] = array(
+  $items['user/%/saved-bids'] = array(
 
-    //// The title - do NOT use t() as t() is called automatically.
-    //'title' => 'Saved bids',
+    // The title - do NOT use t() as t() is called automatically.
+    'title' => 'Saved bids',
 
-    //// Description (hover flyover for menu link). Does NOT use t(), which is
-    //// called automatically.
-    //'description' => 'See saved bids and confirm',
+    // Description (hover flyover for menu link). Does NOT use t(), which is
+    // called automatically.
+    'description' => 'See saved bids and confirm',
 
-    //// Function to be called when this path is accessed.
-    //'page callback' => '_bidding_saved_bids',
-    //'page arguments' => array(1),
+    // Function to be called when this path is accessed.
+    'page callback' => '_bidding_saved_bids_page',
+    'page arguments' => array(1),
 
-    //'access callback' => '_see_user_saved_bids',
-  //);
+    'access callback' => '_see_user_saved_bids',
+    'access arguments' => array(1),
+  );
   
   return $items;
 }
@@ -66,7 +67,7 @@ function bidding_menu() {
 /**
  * Page callback for searching lots.
  */
-function _bidding_search_lots() {
+function _bidding_search_lots_page() {
   $auction = views_get_view_result( 'latest_auction' );
 //dsm( $auction );
   $path = 'auction/' . $auction[0]->nid . '/search-lots';
@@ -75,27 +76,63 @@ function _bidding_search_lots() {
 }
 
 /**
- * Page callback for viewing and confirming saved bids.
+ * Page callback for current user to view and confirm saved bids.
  */
-function _bidding_current_user_saved_bids() {
+function _bidding_current_user_saved_bids_page() {
   global $user;
-  $bids = _bidding_get_saved_bids_by_user( $user->uid );
+  return _bidding_saved_bids_page( $user->uid );
+}
 
-  // truncate auction lot descriptions
-  foreach ( $bids as &$bid ) {
-    if ( strlen( $bid['description'] ) > 60 ) {
-      $bid['description'] = substr( $bid['description'], 0, 50 ) . '...';
+/**
+ * Page callback for to view and confirm saved bids of a given user.
+ */
+function _bidding_saved_bids_page( $uid ) {
+
+  $bids = _bidding_get_saved_bids_by_user( $uid );
+  $num_bids = count( $bids );
+  
+  if ( $num_bids > 0 ) {
+    // truncate auction lot descriptions
+    foreach ( $bids as &$bid ) {
+      if ( strlen( $bid['description'] ) > 60 ) {
+        $bid['description'] = substr( $bid['description'], 0, 50 ) . '...';
+      }
     }
   }
-
+  else {
+    // add an empty row
+    $bids = array( array( '', '', '' ) );
+  }
+  
   $html = theme( 'table',
     array( t('Lot number'), t('Lot description'), t('Bid amount') ),
     $bids
   );
   
-  $html .= drupal_get_form( '_bidding_confirm_saved_bids_form', $bids );
+  if ( $num_bids > 0 ) {
+    $html .= drupal_get_form( '_bidding_confirm_saved_bids_form', $bids );
+  }
+  else {
+    $html .= '<br/><strong>You have no saved bids.</strong> ';
+    $html .= '<br/>You may <a href="/search-auction-lots">search auction lots</a> if you wish.';
+  }
 
   return $html;
+}
+
+/**
+ * Access callback to view and confirm saved bids of a given user.
+ */
+function _see_user_saved_bids( $uid ) {
+  global $user;
+  if ( $uid == $user->uid ) {
+    //dsm( 'bid on auction lot' );
+    return user_access( 'bid on auction lot' );
+  }
+  else {
+    //dsm( 'administer bidding' );
+    return user_access( 'administer bidding' );
+  }
 }
 
 /**
