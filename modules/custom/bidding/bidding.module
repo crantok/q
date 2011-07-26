@@ -21,7 +21,7 @@ function bidding_menu() {
     // called automatically.
     'description' => 'Search lots in the current auction',
 
-    // Function to be called when this path is accessed.
+    // Fn to be called when this path is accessed.
     'page callback' => '_bidding_search_lots_page',
 
     'access arguments' => array( 'search auction lots' ),
@@ -38,7 +38,7 @@ function bidding_menu() {
     // called automatically.
     'description' => 'See saved bids and confirm',
 
-    // Function to be called when this path is accessed.
+    // Fn to be called when this path is accessed.
     'page callback' => '_bidding_current_user_saved_bids_page',
 
     'access arguments' => array( 'bid on auction lot' ),
@@ -53,11 +53,11 @@ function bidding_menu() {
     // called automatically.
     'description' => 'See saved bids and confirm',
 
-    // Function to be called when this path is accessed.
+    // Fn to be called when this path is accessed.
     'page callback' => '_bidding_saved_bids_page',
     'page arguments' => array(1),
 
-    'access callback' => '_see_user_saved_bids',
+    'access callback' => '_bidding_access_user_saved_bids',
     'access arguments' => array(1),
   );
   
@@ -74,7 +74,7 @@ function _bidding_search_lots_page() {
 }
 
 /*
- * Helper function to get latest auction Node ID.
+ * Helper fn to get latest auction Node ID.
  */
 function _bidding_get_latest_auction_nid() {
   $auction = views_get_view_result( 'latest_auction' );
@@ -133,7 +133,7 @@ function _bidding_saved_bids_page( $uid ) {
  * @param $uid
  *   The ID of the User that made the bids that are to be viewed.
  */
-function _see_user_saved_bids( $uid ) {
+function _bidding_access_user_saved_bids( $uid ) {
   global $user;
   if ( $uid == $user->uid ) {
     //dsm( 'bid on auction lot' );
