@@ -82,3 +82,8 @@
 .save-reminder {
   color: #aa0000;
 }
+
+#suckerfishmenu li.last {
+  float:right;
+}
+

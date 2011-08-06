@@ -31,8 +31,7 @@ function bidding_menu() {
   
   $items['saved-bids'] = array(
 
-    // The title - do NOT use t() as t() is called automatically.
-    'title' => 'Saved bids',
+    'title callback' => '_bidding_saved_bids_menu_title',
 
     // Description (hover flyover for menu link). Does NOT use t(), which is
     // called automatically.
@@ -42,6 +41,9 @@ function bidding_menu() {
     'page callback' => '_bidding_current_user_saved_bids_page',
 
     'access arguments' => array( 'bid on auction lot' ),
+
+    'menu_name' => 'primary-links',
+    'weight' => 50,
   );
   
   $items['user/%/saved-bids'] = array(
@@ -59,18 +61,33 @@ function bidding_menu() {
 
     'access callback' => '_bidding_access_user_saved_bids',
     'access arguments' => array(1),
+    
+    'type' => MENU_LOCAL_TASK,
   );
   
   return $items;
 }
 
 /**
- * Page callback for searching lots.
+ * Page callback for viewing and searching lots.
+ * 
+ * The link to the current auction-lots view changes over time because it
+ * includes the auction nid as an argument in the path. Rather than risk
+ * confusing the user by taking them to a different URL for each auction (that
+ * may then get stored in their browser history) just display the appropriately
+ * parameterised view at the current (static) URL.
  */
 function _bidding_search_lots_page() {
-  $path = 'auction/' . _bidding_get_latest_auction_nid() . '/search-lots';
-//dsm( $path );
-  drupal_goto( $path );
+
+  $auction_nid = _bidding_get_latest_auction_nid();
+  
+  // Unfortunately, calling views_page() seems to bypass the title-rewrite
+  // that is associated with the view argument, so we're setting the page
+  // title manually.
+  $auction_number = node_load( array( 'nid' => $auction_nid ) )->title;
+  drupal_set_title( t('Search for lots in auction ') . $auction_number );
+  
+  return views_page( 'auction_lots', 'page', $auction_nid );
 }
 
 /*
@@ -83,11 +100,29 @@ function _bidding_get_latest_auction_nid() {
 }
 
 /**
- * Page callback for current user to view and confirm saved bids.
+ * Menu item title callback for saved bids page.
+ */
+function _bidding_saved_bids_menu_title() {
+
+  global $user;
+  $title = t('Saved bids');
+  if ( $user->uid != 0 ) {
+    $title .= ' (' . _bidding_get_num_saved_bids( $user->uid ) . ')';
+  }
+  return $title;
+}
+
+
+/**
+ * Page callback to redirect current user their own saved bids page.
+ * 
+ * There are two visible menu items for the current user's saved bids page.
+ * Rather than show the same output in two places (which might be confusing)
+ * we will send the user to the personalised URL.
  */
 function _bidding_current_user_saved_bids_page() {
   global $user;
-  return _bidding_saved_bids_page( $user->uid );
+  drupal_goto( 'user/' . $user->uid . '/saved-bids' );
 }
 
 /**
@@ -250,6 +285,7 @@ function bidding_block($op = 'list', $delta = '', $edit = array()) {
         break;
       }
       return $block;
+    break;
   }
 }
 
@@ -402,7 +438,11 @@ function _bidding_get_saved_bids_by_user( $uid, $only_current_auction=TRUE ) {
   }
   return $rows;
 }
-  
+
+function _bidding_get_num_saved_bids( $uid ) {
+  return count( _bidding_get_saved_bids_by_user( $uid ) );
+}
+
 function _bidding_get_saved_bid( $uid, $lot_nid ) {
 
   $sql = 'SELECT * FROM bidding_basket WHERE uid = %d AND nid = %d';
