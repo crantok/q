@@ -1,242 +1,15 @@
 <?php
 
-/**
+/******************************************************************************
  * Implementes hook_perm()
  */
 function bidding_perm() {
   return array( 'search auction lots', 'bid on auction lot', 'administer bidding' );
 }
 
-/**
- * Implements hook_menu()
- */
-function bidding_menu() {
-
-  $items['search-auction-lots'] = array(
-
-    // The title - do NOT use t() as t() is called automatically.
-    'title' => 'Search auction lots',
-
-    // Description (hover flyover for menu link). Does NOT use t(), which is
-    // called automatically.
-    'description' => 'Search lots in the current auction',
-
-    // Fn to be called when this path is accessed.
-    'page callback' => '_bidding_search_lots_page',
-
-    'access arguments' => array( 'search auction lots' ),
-    'menu_name' => 'primary-links',
-    'weight' => -48,
-  );
-  
-  $items['saved-bids'] = array(
-
-    'title callback' => '_bidding_saved_bids_menu_title',
-
-    // Description (hover flyover for menu link). Does NOT use t(), which is
-    // called automatically.
-    'description' => 'See saved bids and confirm',
-
-    // Fn to be called when this path is accessed.
-    'page callback' => '_bidding_current_user_saved_bids_page',
-
-    'access arguments' => array( 'bid on auction lot' ),
-
-    'menu_name' => 'primary-links',
-    'weight' => 50,
-  );
-  
-  $items['user/%/saved-bids'] = array(
-
-    // The title - do NOT use t() as t() is called automatically.
-    'title' => 'Saved bids',
-
-    // Description (hover flyover for menu link). Does NOT use t(), which is
-    // called automatically.
-    'description' => 'See saved bids and confirm',
-
-    // Fn to be called when this path is accessed.
-    'page callback' => '_bidding_saved_bids_page',
-    'page arguments' => array(1),
-
-    'access callback' => '_bidding_access_user_saved_bids',
-    'access arguments' => array(1),
-    
-    'type' => MENU_LOCAL_TASK,
-  );
-  
-  return $items;
-}
-
-/**
- * Page callback for viewing and searching lots.
- * 
- * The link to the current auction-lots view changes over time because it
- * includes the auction nid as an argument in the path. Rather than risk
- * confusing the user by taking them to a different URL for each auction (that
- * may then get stored in their browser history) just display the appropriately
- * parameterised view at the current (static) URL.
- */
-function _bidding_search_lots_page() {
-
-  $auction_nid = _bidding_get_latest_auction_nid();
-  
-  // Unfortunately, calling views_page() seems to bypass the title-rewrite
-  // that is associated with the view argument, so we're setting the page
-  // title manually.
-  $auction_number = node_load( array( 'nid' => $auction_nid ) )->title;
-  drupal_set_title( t('Search for lots in auction ') . $auction_number );
-  
-  return views_page( 'auction_lots', 'page', $auction_nid );
-}
-
-/*
- * Helper fn to get latest auction Node ID.
- */
-function _bidding_get_latest_auction_nid() {
-  $auction = views_get_view_result( 'latest_auction' );
-//dsm( $auction );
-  return $auction[0]->nid;
-}
-
-/**
- * Menu item title callback for saved bids page.
- */
-function _bidding_saved_bids_menu_title() {
-
-  global $user;
-  $title = t('Saved bids');
-  if ( $user->uid != 0 ) {
-    $title .= ' (' . _bidding_get_num_saved_bids( $user->uid ) . ')';
-  }
-  return $title;
-}
 
 
-/**
- * Page callback to redirect current user their own saved bids page.
- * 
- * There are two visible menu items for the current user's saved bids page.
- * Rather than show the same output in two places (which might be confusing)
- * we will send the user to the personalised URL.
- */
-function _bidding_current_user_saved_bids_page() {
-  global $user;
-  drupal_goto( 'user/' . $user->uid . '/saved-bids' );
-}
-
-/**
- * Page callback for to view and confirm saved bids of a given user.
- */
-function _bidding_saved_bids_page( $uid ) {
-
-  $bids = _bidding_get_saved_bids_by_user( $uid );
-  $num_bids = count( $bids );
-  
-  if ( $num_bids > 0 ) {
-    // truncate auction lot descriptions
-    foreach ( $bids as &$bid ) {
-      if ( strlen( $bid['description'] ) > 60 ) {
-        $bid['description'] = substr( $bid['description'], 0, 50 ) . '...';
-      }
-    }
-  }
-  else {
-    // add an empty row
-    $bids = array( array( '', '', '' ) );
-  }
-  
-  $html = theme( 'table',
-    array( t('Lot number'), t('Lot description'), t('Bid limit') ),
-    $bids
-  );
-  
-  if ( $num_bids > 0 ) {
-    $html .= drupal_get_form( '_bidding_confirm_saved_bids_form', $bids );
-  }
-  else {
-    $html .= '<br/><strong>You have no saved bids.</strong> ';
-    $html .= '<br/>You may <a href="/search-auction-lots">search auction lots</a> if you wish.';
-  }
-
-  return $html;
-}
-
-/**
- * Access callback to view and confirm saved bids of a given user.
- * 
- * @param $uid
- *   The ID of the User that made the bids that are to be viewed.
- */
-function _bidding_access_user_saved_bids( $uid ) {
-  global $user;
-  if ( $uid == $user->uid ) {
-    //dsm( 'bid on auction lot' );
-    return user_access( 'bid on auction lot' );
-  }
-  else {
-    //dsm( 'administer bidding' );
-    return user_access( 'administer bidding' );
-  }
-}
-
-/**
- *
- */
-function _bidding_confirm_saved_bids_form( $dummy, $bids ) {
-
-  $form = array();
-
-  $form['bids'] = array(
-    '#type' => 'value',
-    '#value' => $bids,
-  );
-    
-  $form['explanation'] = array(
-    '#type' => 'item',
-    '#value' =>
-      'If you are sure that these are the bids you want to make, then you can <b>Confirm</b> them.<br/>' .
-      'On confirming your saved bids, a copy will be emailed to Quest and another to yourself.',
-  );
-  
-  $form['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Confirm these bids'),
-  );
-  
-  return $form;
-}
-
-function _bidding_confirm_saved_bids_form_submit( &$form, &$form_state ) {
-
-  global $user;
-
-  $recipients = variable_get('site_mail', '' ) . ', ' . $user->mail;
-  //dsm ( $recipients );
-
-  $params = array (
-    'site_name' => variable_get( 'site_name', 'Quest'),
-    'user_login' => $user->name,
-    'user_email' => $user->mail,
-    'user_page' => url( 'user/' . $user->uid, array( 'absolute' => TRUE ) ),
-    'bids' => $form_state['values']['bids'],
-  );
-  //dsm( $params );
-  
-  $message = drupal_mail( 'bidding', 'bids_confirmed', $recipients, language_default(), $params );
-  //dsm( $message );
-  
-  if ( $message['result'] ) {
-    drupal_set_message(
-      'Your bids have been confirmed. You should receive an email shortly.' );
-    _bidding_delete_saved_bids_by_user( $user->uid );
-  }
-  else {
-    // Do nothing - mail system should show an error message to user.
-  }    
-}
-
-/**
+/******************************************************************************
  * Implements hook_block()
  */  
 function bidding_block($op = 'list', $delta = '', $edit = array()) {
@@ -269,8 +42,8 @@ function bidding_block($op = 'list', $delta = '', $edit = array()) {
             $lot = _bidding_get_current_lot_node();
             if ( $lot ) {
               $auction = node_load( $lot->field_lot_auction[0]['nid'] );
-              $block['subject'] = _bidding_form_block_subject( $lot, $auction );
-              $block['content'] = _bidding_form_block_content( $lot, $auction );
+              $block['subject'] = _bidding_make_bid_block_subject( $lot, $auction );
+              $block['content'] = _bidding_make_bid_block_content( $lot, $auction );
             }
             else {
               drupal_set_message(
@@ -289,38 +62,13 @@ function bidding_block($op = 'list', $delta = '', $edit = array()) {
   }
 }
 
-function _bidding_get_current_lot_node() {
-  
-  $nid = _bidding_get_current_node_id();
-  
-  if ( $nid ) {
-    $node = node_load( $nid );
-    if ( $node->type == 'auction_lot' ) {
-      return $node;
-    }
-  }
-  
-  return NULL;
-}
-
-function _bidding_get_current_node_id() {
-
-  if ( arg(0) == 'node' && is_numeric( arg(1) ) ) {
-    return arg(1);
-  }
-  else {
-    return NULL;
-  }
-}
-
-  
 /**
  * Subject text for bidding-form block.
  * 
  * @param
  *   A string containing subject text.
  */
-function _bidding_form_block_subject( $lot, $auction ) {
+function _bidding_make_bid_block_subject( $lot, $auction ) {
 
   if ( strtotime( $auction->field_auction_end_time[0]['value'] ) < time() ) {
     return '';
@@ -338,7 +86,7 @@ function _bidding_form_block_subject( $lot, $auction ) {
  * @return
  *   A string containing content of the block.
  */
-function _bidding_form_block_content( $lot, $auction ) {
+function _bidding_make_bid_block_content( $lot, $auction ) {
 
   if ( strtotime( $auction->field_auction_end_time[0]['value'] ) < time() ) {
     return t( 'Bidding has ended for this item.' );
@@ -404,6 +152,369 @@ function _bidding_form_submit( &$form, &$form_state ) {
   }
 }
 
+
+
+/******************************************************************************
+ * Implements hook_menu()
+ */
+function bidding_menu() {
+
+  $items['search-auction-lots'] = array(
+
+    // The title - do NOT use t() as t() is called automatically.
+    'title' => 'Search auction lots',
+
+    // Description (hover flyover for menu link). Does NOT use t(), which is
+    // called automatically.
+    'description' => 'Search lots in the current auction',
+
+    // Fn to be called when this path is accessed.
+    'page callback' => '_bidding_search_lots_page',
+
+    'access arguments' => array( 'search auction lots' ),
+    'menu_name' => 'primary-links',
+    'weight' => -48,
+  );
+  
+  $items['saved-bids'] = array(
+
+    'title callback' => '_bidding_saved_bids_menu_title',
+
+    // Description (hover flyover for menu link). Does NOT use t(), which is
+    // called automatically.
+    'description' => 'See saved bids and confirm',
+
+    // Fn to be called when this path is accessed.
+    'page callback' => '_bidding_current_user_saved_bids_page',
+
+    'access arguments' => array( 'bid on auction lot' ),
+
+    'menu_name' => 'primary-links',
+    'weight' => 50,
+  );
+  
+  $items['user/%/saved-bids'] = array(
+
+    // The title - do NOT use t() as t() is called automatically.
+    'title' => 'Saved bids',
+
+    // Description (hover flyover for menu link). Does NOT use t(), which is
+    // called automatically.
+    'description' => 'See saved bids and confirm',
+
+    // Fn to be called when this path is accessed.
+    'page callback' => '_bidding_saved_bids_page',
+    'page arguments' => array(1),
+
+    'access callback' => '_bidding_access_user_saved_bids',
+    'access arguments' => array(1),
+    
+    'type' => MENU_LOCAL_TASK,
+  );
+  
+  $items['auction-bid/%/delete'] = array(
+
+    // The title - do NOT use t() as t() is called automatically.
+    'title' => 'Delete bid',
+
+    'description' => 'Delete a bid',
+
+    // Fn to be called when this path is accessed.
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array( '_bidding_delete_bid_form', 1),
+
+    'access callback' => '_bidding_access_delete_bid',
+    'access arguments' => array(1),
+    
+    'type' => MENU_CALLBACK,
+  );
+  
+  return $items;
+}
+
+
+
+/**
+ * Page callback for viewing and searching lots.
+ * 
+ * The link to the current auction-lots view changes over time because it
+ * includes the auction nid as an argument in the path. Rather than risk
+ * confusing the user by taking them to a different URL for each auction (that
+ * may then get stored in their browser history) just display the appropriately
+ * parameterised view at the current (static) URL.
+ */
+function _bidding_search_lots_page() {
+
+  $auction_nid = _bidding_get_latest_auction_nid();
+  
+  // Unfortunately, calling views_page() seems to bypass the title-rewrite
+  // that is associated with the view argument, so we're setting the page
+  // title manually.
+  $auction_number = node_load( array( 'nid' => $auction_nid ) )->title;
+  drupal_set_title( t('Search for lots in auction ') . $auction_number );
+  
+  return views_page( 'auction_lots', 'page', $auction_nid );
+}
+
+/*
+ * Helper fn to get latest auction Node ID.
+ */
+function _bidding_get_latest_auction_nid() {
+  $auction = views_get_view_result( 'latest_auction' );
+//dsm( $auction );
+  return $auction[0]->nid;
+}
+
+
+
+/**
+ * Page callback to redirect current user their own saved bids page.
+ * 
+ * There are two visible menu items for the current user's saved bids page.
+ * Rather than show the same output in two places (which might be confusing)
+ * we will send the user to the personalised URL.
+ */
+function _bidding_current_user_saved_bids_page() {
+  global $user;
+  drupal_goto( 'user/' . $user->uid . '/saved-bids' );
+}
+
+/**
+ * Menu item title callback for saved bids page.
+ */
+function _bidding_saved_bids_menu_title() {
+
+  global $user;
+  $title = t('Saved bids');
+  if ( $user->uid != 0 ) {
+    $title .= ' (' . _bidding_get_num_saved_bids( $user->uid ) . ')';
+  }
+  return $title;
+}
+
+
+
+/**
+ * Page callback for to view and confirm saved bids of a given user.
+ */
+function _bidding_saved_bids_page( $uid ) {
+
+  $headings =
+    array( t('Lot number'), t('Lot description'), t('Bid limit'), t('Delete') );
+  
+  $bids = _bidding_get_displayable_saved_bids_by_user( $uid );
+  $num_bids = count( $bids );
+
+  if ( $num_bids == 0 ) {
+    // add an empty row
+    $bids = array_pad( array(), count( $headings ), '' );
+  }
+  
+  $html = theme( 'table', $headings, $bids );
+  
+  if ( $num_bids > 0 ) {
+    $html .= drupal_get_form( '_bidding_confirm_saved_bids_form', $bids );
+  }
+  else {
+    $html .= '<br/><strong>You have no saved bids.</strong> ';
+    $html .= '<br/>You may <a href="/search-auction-lots">search auction lots</a> if you wish.';
+  }
+
+  return $html;
+}
+
+/**
+ * Access callback to view and confirm saved bids of a given user.
+ * 
+ * @param $uid
+ *   The ID of the User that made the bids that are to be viewed.
+ */
+function _bidding_access_user_saved_bids( $uid ) {
+  global $user;
+  if ( $uid == $user->uid ) {
+    //dsm( 'bid on auction lot' );
+    return user_access( 'bid on auction lot' );
+  }
+  else {
+    //dsm( 'administer bidding' );
+    return user_access( 'administer bidding' );
+  }
+}
+
+function _bidding_confirm_saved_bids_form( $dummy, $bids ) {
+
+  $form = array();
+
+  $form['bids'] = array(
+    '#type' => 'value',
+    '#value' => $bids,
+  );
+    
+  $form['explanation'] = array(
+    '#type' => 'item',
+    '#value' =>
+      'If you are sure that these are the bids you want to make, then you can <b>Confirm</b> them.<br/>' .
+      'On confirming your saved bids, a copy will be emailed to Quest and another to yourself.',
+  );
+  
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Confirm these bids'),
+  );
+  
+  return $form;
+}
+
+function _bidding_confirm_saved_bids_form_submit( &$form, &$form_state ) {
+
+  global $user;
+
+  $recipients = variable_get('site_mail', '' ) . ', ' . $user->mail;
+  //dsm ( $recipients );
+
+  $params = array (
+    'site_name' => variable_get( 'site_name', 'Quest'),
+    'user_login' => $user->name,
+    'user_email' => $user->mail,
+    'user_page' => url( 'user/' . $user->uid, array( 'absolute' => TRUE ) ),
+    'bids' => $form_state['values']['bids'],
+  );
+  //dsm( $params );
+  
+  $message = drupal_mail( 'bidding', 'bids_confirmed', $recipients, language_default(), $params );
+  //dsm( $message );
+  
+  if ( $message['result'] ) {
+    drupal_set_message(
+      'Your bids have been confirmed. You should receive an email shortly.' );
+    _bidding_delete_saved_bids_by_user( $user->uid );
+  }
+  else {
+    // Do nothing - mail system should show an error message to user.
+  }    
+}
+
+
+
+/**
+ * Form to delete a bid.
+ */
+function _bidding_delete_bid_form( &$form_state, $bid_id ) {
+
+  $form['bid_id'] = array(
+    '#type' => 'value',
+    '#value' => $bid_id,
+  );
+  
+  $bid = _bidding_get_saved_bid_by_id( $bid_id );
+  $lot = node_load( array( 'nid' => $bid->nid ) );
+  $lot_number = $lot->title;
+
+  return confirm_form($form,
+    t('Are you sure you want to delete your bid for lot number @lot_number?', array('@lot_number' => $lot_number)),
+    isset($_GET['destination']) ? $_GET['destination'] : 'saved-bids',
+    t('This action cannot be undone.'),
+    t('Delete'),
+    t('Cancel')
+  );
+}
+
+function _bidding_delete_bid_form_submit( $form, &$form_state ) {
+  _bidding_delete_saved_bid_by_id( $form_state['values']['bid_id'] );
+}
+
+/**
+ * Access callback to delete a saved bid.
+ * 
+ * @param $id
+ *   The unique ID of the bid.
+ */
+function _bidding_access_delete_bid( $id ) {
+  
+  $bid = _bidding_get_saved_bid_by_id( $id );
+  if ( $bid ) {
+    $uid = $bid->uid;
+
+    global $user;
+    if ( $uid == $user->uid ) {
+      //dsm( 'bid on auction lot' );
+      return user_access( 'bid on auction lot' );
+    }
+    else {
+      //dsm( 'administer bidding' );
+      return user_access( 'administer bidding' );
+    }
+  }
+}
+
+
+
+/******************************************************************************
+ * CRUD and other helper functions.
+ */
+
+function _bidding_get_current_lot_node() {
+  
+  $nid = _bidding_get_current_node_id();
+  
+  if ( $nid ) {
+    $node = node_load( $nid );
+    if ( $node->type == 'auction_lot' ) {
+      return $node;
+    }
+  }
+  
+  return NULL;
+}
+
+function _bidding_get_current_node_id() {
+
+  if ( arg(0) == 'node' && is_numeric( arg(1) ) ) {
+    return arg(1);
+  }
+  else {
+    return NULL;
+  }
+}
+  
+/**
+ * Get displayable saved bids for a specific user.
+ * 
+ * @param $uid
+ *   User id from the {users} table.
+ * @param $only_current_auction
+ *   Should only bids in the current auction be returned? (Generally we don't
+ *   want the user to see any unconfirmed bids from previous auctions. That
+ *   would be confusing.)
+ * 
+ * @return
+ *   An array of displayable bids. Each displayable bid is also an array.
+ */
+function _bidding_get_displayable_saved_bids_by_user( $uid, $only_current_auction=TRUE ) {
+  
+  $raw_bids = _bidding_get_raw_saved_bids_by_user( $uid, $only_current_auction );
+  $result = array();
+  foreach ( $raw_bids as $raw_bid ) {
+    
+    $displayable_bid = $raw_bid;
+
+    // Don't show the bid ID because it should be menaingless to the user.
+    unset( $displayable_bid['id'] );
+    
+    // Truncate description.
+    if ( strlen( $raw_bid['description'] ) > 60 ) {
+      $displayable_bid['description'] = substr( $raw_bid['description'], 0, 50 ) . '...';
+    }
+    
+    // Add a link to delete the bid.
+    $displayable_bid['Delete'] =
+      '<a href="/auction-bid/' . $raw_bid['id'] . '/delete?' . drupal_get_destination() . '">delete</a>';
+    
+    $result[] = $displayable_bid;
+  }
+  return $result;
+}
+
 /**
  * Get saved bids for a specific user.
  * 
@@ -417,9 +528,9 @@ function _bidding_form_submit( &$form, &$form_state ) {
  * @return
  *   An array of bids. Each bid is also an array.
  */
-function _bidding_get_saved_bids_by_user( $uid, $only_current_auction=TRUE ) {
+function _bidding_get_raw_saved_bids_by_user( $uid, $only_current_auction=TRUE ) {
 
-  $sql = 'SELECT n.title number, l.field_lot_description_value description, b.amount ' .
+  $sql = 'SELECT b.id, n.title number, l.field_lot_description_value description, b.amount ' .
     'FROM {bidding_basket} b JOIN {node} n ON b.nid = n.nid ' .
     'JOIN {content_type_auction_lot} l ON n.vid = l.vid ' .
     'WHERE b.uid = %d';
@@ -440,13 +551,23 @@ function _bidding_get_saved_bids_by_user( $uid, $only_current_auction=TRUE ) {
 }
 
 function _bidding_get_num_saved_bids( $uid ) {
-  return count( _bidding_get_saved_bids_by_user( $uid ) );
+  return count( _bidding_get_raw_saved_bids_by_user( $uid ) );
 }
 
 function _bidding_get_saved_bid( $uid, $lot_nid ) {
 
   $sql = 'SELECT * FROM bidding_basket WHERE uid = %d AND nid = %d';
   $query_result = db_query( $sql, $uid, $lot_nid );
+  $rows = array();
+  while ( $row = db_fetch_object( $query_result ) ) {
+    $rows[] = $row;
+  }
+  return count( $rows ) ? $rows[0] : NULL;
+}
+function _bidding_get_saved_bid_by_id( $id ) {
+
+  $sql = 'SELECT * FROM bidding_basket WHERE id = %d';
+  $query_result = db_query( $sql, $id );
   $rows = array();
   while ( $row = db_fetch_object( $query_result ) ) {
     $rows[] = $row;
@@ -461,6 +582,10 @@ function _bidding_save_bid( $uid, $lot_nid, $amount ) {
 
 function _bidding_delete_saved_bids_by_user( $uid ) {
   db_query( 'DELETE FROM {bidding_basket} WHERE uid = %d', $uid );
+}
+
+function _bidding_delete_saved_bid_by_id( $id ) {
+  db_query( 'DELETE FROM {bidding_basket} WHERE id = %d', $id );
 }
 
 /**
@@ -496,14 +621,13 @@ function bidding_mail( $key, &$message, $params ) {
 
 
 // @todo : Things that did not get added to online_bidding feature:
-// - block visibility settings - don't want to show menu sidebar blocks on /auction/*/search-lots
-// - permissions - auth user needs to have all the premissions that anon user has
-// - turning off post details in the global theme configuration
+// - block visibility settings - don't want to show menu sidebar blocks on /search-auction-lots
+// - permissions - auth user needs to have all the permissions that anon user has
+// - turning off post details in the global theme configuration for auction_lot and ?
+
 
 // @bonus : Add simplenews to replace mailchimp (simple interface for Alec)
 // @bonus : auto-clear-up or manual delete of old lot data
-// @bonus : Report for customer - see bids they've made
-// @bonus : Report for admin - see winning bids for each lot (bid time is v. important)
 
 
 
