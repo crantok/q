@@ -64,10 +64,10 @@ function online_bidding_views_default_views() {
   $handler->display->display_options['fields']['title']['alter']['alter_text'] = 0;
   $handler->display->display_options['fields']['title']['alter']['make_link'] = 0;
   $handler->display->display_options['fields']['title']['alter']['absolute'] = 0;
-  $handler->display->display_options['fields']['title']['alter']['trim'] = 0;
   $handler->display->display_options['fields']['title']['alter']['word_boundary'] = 1;
   $handler->display->display_options['fields']['title']['alter']['ellipsis'] = 1;
   $handler->display->display_options['fields']['title']['alter']['strip_tags'] = 0;
+  $handler->display->display_options['fields']['title']['alter']['trim'] = 0;
   $handler->display->display_options['fields']['title']['alter']['html'] = 0;
   $handler->display->display_options['fields']['title']['hide_empty'] = 0;
   $handler->display->display_options['fields']['title']['empty_zero'] = 0;
@@ -80,10 +80,10 @@ function online_bidding_views_default_views() {
   $handler->display->display_options['fields']['field_auction_end_time_value']['alter']['alter_text'] = 0;
   $handler->display->display_options['fields']['field_auction_end_time_value']['alter']['make_link'] = 0;
   $handler->display->display_options['fields']['field_auction_end_time_value']['alter']['absolute'] = 0;
-  $handler->display->display_options['fields']['field_auction_end_time_value']['alter']['trim'] = 0;
   $handler->display->display_options['fields']['field_auction_end_time_value']['alter']['word_boundary'] = 1;
   $handler->display->display_options['fields']['field_auction_end_time_value']['alter']['ellipsis'] = 1;
   $handler->display->display_options['fields']['field_auction_end_time_value']['alter']['strip_tags'] = 0;
+  $handler->display->display_options['fields']['field_auction_end_time_value']['alter']['trim'] = 0;
   $handler->display->display_options['fields']['field_auction_end_time_value']['alter']['html'] = 0;
   $handler->display->display_options['fields']['field_auction_end_time_value']['hide_empty'] = 0;
   $handler->display->display_options['fields']['field_auction_end_time_value']['empty_zero'] = 0;
@@ -96,10 +96,10 @@ function online_bidding_views_default_views() {
   $handler->display->display_options['fields']['field_auction_catalogue_fid']['alter']['alter_text'] = 0;
   $handler->display->display_options['fields']['field_auction_catalogue_fid']['alter']['make_link'] = 0;
   $handler->display->display_options['fields']['field_auction_catalogue_fid']['alter']['absolute'] = 0;
-  $handler->display->display_options['fields']['field_auction_catalogue_fid']['alter']['trim'] = 0;
   $handler->display->display_options['fields']['field_auction_catalogue_fid']['alter']['word_boundary'] = 1;
   $handler->display->display_options['fields']['field_auction_catalogue_fid']['alter']['ellipsis'] = 1;
   $handler->display->display_options['fields']['field_auction_catalogue_fid']['alter']['strip_tags'] = 0;
+  $handler->display->display_options['fields']['field_auction_catalogue_fid']['alter']['trim'] = 0;
   $handler->display->display_options['fields']['field_auction_catalogue_fid']['alter']['html'] = 0;
   $handler->display->display_options['fields']['field_auction_catalogue_fid']['hide_empty'] = 0;
   $handler->display->display_options['fields']['field_auction_catalogue_fid']['empty_zero'] = 0;
@@ -112,10 +112,10 @@ function online_bidding_views_default_views() {
   $handler->display->display_options['fields']['status']['alter']['alter_text'] = 0;
   $handler->display->display_options['fields']['status']['alter']['make_link'] = 0;
   $handler->display->display_options['fields']['status']['alter']['absolute'] = 0;
-  $handler->display->display_options['fields']['status']['alter']['trim'] = 0;
   $handler->display->display_options['fields']['status']['alter']['word_boundary'] = 1;
   $handler->display->display_options['fields']['status']['alter']['ellipsis'] = 1;
   $handler->display->display_options['fields']['status']['alter']['strip_tags'] = 0;
+  $handler->display->display_options['fields']['status']['alter']['trim'] = 0;
   $handler->display->display_options['fields']['status']['alter']['html'] = 0;
   $handler->display->display_options['fields']['status']['hide_empty'] = 0;
   $handler->display->display_options['fields']['status']['empty_zero'] = 0;
@@ -251,10 +251,10 @@ Tips for searching:<ul>
   $handler->display->display_options['fields']['nid']['alter']['alter_text'] = 0;
   $handler->display->display_options['fields']['nid']['alter']['make_link'] = 0;
   $handler->display->display_options['fields']['nid']['alter']['absolute'] = 0;
-  $handler->display->display_options['fields']['nid']['alter']['trim'] = 0;
   $handler->display->display_options['fields']['nid']['alter']['word_boundary'] = 1;
   $handler->display->display_options['fields']['nid']['alter']['ellipsis'] = 1;
   $handler->display->display_options['fields']['nid']['alter']['strip_tags'] = 0;
+  $handler->display->display_options['fields']['nid']['alter']['trim'] = 0;
   $handler->display->display_options['fields']['nid']['alter']['html'] = 0;
   $handler->display->display_options['fields']['nid']['hide_empty'] = 0;
   $handler->display->display_options['fields']['nid']['empty_zero'] = 0;
@@ -267,10 +267,10 @@ Tips for searching:<ul>
   $handler->display->display_options['fields']['title']['alter']['alter_text'] = 0;
   $handler->display->display_options['fields']['title']['alter']['make_link'] = 0;
   $handler->display->display_options['fields']['title']['alter']['absolute'] = 0;
-  $handler->display->display_options['fields']['title']['alter']['trim'] = 0;
   $handler->display->display_options['fields']['title']['alter']['word_boundary'] = 1;
   $handler->display->display_options['fields']['title']['alter']['ellipsis'] = 1;
   $handler->display->display_options['fields']['title']['alter']['strip_tags'] = 0;
+  $handler->display->display_options['fields']['title']['alter']['trim'] = 0;
   $handler->display->display_options['fields']['title']['alter']['html'] = 0;
   $handler->display->display_options['fields']['title']['hide_empty'] = 0;
   $handler->display->display_options['fields']['title']['empty_zero'] = 0;
@@ -287,33 +287,40 @@ Tips for searching:<ul>
   $handler->display->display_options['fields']['field_lot_description_value']['alter']['external'] = 0;
   $handler->display->display_options['fields']['field_lot_description_value']['alter']['replace_spaces'] = 0;
   $handler->display->display_options['fields']['field_lot_description_value']['alter']['trim_whitespace'] = 0;
-  $handler->display->display_options['fields']['field_lot_description_value']['alter']['trim'] = 0;
   $handler->display->display_options['fields']['field_lot_description_value']['alter']['nl2br'] = 0;
   $handler->display->display_options['fields']['field_lot_description_value']['alter']['word_boundary'] = 1;
   $handler->display->display_options['fields']['field_lot_description_value']['alter']['ellipsis'] = 1;
   $handler->display->display_options['fields']['field_lot_description_value']['alter']['strip_tags'] = 0;
+  $handler->display->display_options['fields']['field_lot_description_value']['alter']['trim'] = 0;
   $handler->display->display_options['fields']['field_lot_description_value']['alter']['html'] = 0;
   $handler->display->display_options['fields']['field_lot_description_value']['element_label_colon'] = 1;
   $handler->display->display_options['fields']['field_lot_description_value']['element_default_classes'] = 1;
   $handler->display->display_options['fields']['field_lot_description_value']['hide_empty'] = 0;
   $handler->display->display_options['fields']['field_lot_description_value']['empty_zero'] = 0;
   $handler->display->display_options['fields']['field_lot_description_value']['link_to_node'] = 1;
-  /* Field: Content: Price (field_lot_price) */
+  /* Field: Content: Estimate (field_lot_price) */
   $handler->display->display_options['fields']['field_lot_price_value']['id'] = 'field_lot_price_value';
   $handler->display->display_options['fields']['field_lot_price_value']['table'] = 'node_data_field_lot_price';
   $handler->display->display_options['fields']['field_lot_price_value']['field'] = 'field_lot_price_value';
-  $handler->display->display_options['fields']['field_lot_price_value']['label'] = 'Price';
+  $handler->display->display_options['fields']['field_lot_price_value']['label'] = 'Estimate';
   $handler->display->display_options['fields']['field_lot_price_value']['alter']['alter_text'] = 0;
   $handler->display->display_options['fields']['field_lot_price_value']['alter']['make_link'] = 0;
   $handler->display->display_options['fields']['field_lot_price_value']['alter']['absolute'] = 0;
-  $handler->display->display_options['fields']['field_lot_price_value']['alter']['trim'] = 0;
+  $handler->display->display_options['fields']['field_lot_price_value']['alter']['external'] = 0;
+  $handler->display->display_options['fields']['field_lot_price_value']['alter']['replace_spaces'] = 0;
+  $handler->display->display_options['fields']['field_lot_price_value']['alter']['trim_whitespace'] = 0;
+  $handler->display->display_options['fields']['field_lot_price_value']['alter']['nl2br'] = 0;
   $handler->display->display_options['fields']['field_lot_price_value']['alter']['word_boundary'] = 1;
   $handler->display->display_options['fields']['field_lot_price_value']['alter']['ellipsis'] = 1;
   $handler->display->display_options['fields']['field_lot_price_value']['alter']['strip_tags'] = 0;
+  $handler->display->display_options['fields']['field_lot_price_value']['alter']['trim'] = 0;
   $handler->display->display_options['fields']['field_lot_price_value']['alter']['html'] = 0;
+  $handler->display->display_options['fields']['field_lot_price_value']['element_label_colon'] = 1;
+  $handler->display->display_options['fields']['field_lot_price_value']['element_default_classes'] = 1;
   $handler->display->display_options['fields']['field_lot_price_value']['hide_empty'] = 0;
   $handler->display->display_options['fields']['field_lot_price_value']['empty_zero'] = 0;
   $handler->display->display_options['fields']['field_lot_price_value']['link_to_node'] = 0;
+  $handler->display->display_options['fields']['field_lot_price_value']['label_type'] = 'custom';
   $handler->display->display_options['fields']['field_lot_price_value']['format'] = 'us_0';
   /* Field: Content: Categories (field_lot_category) */
   $handler->display->display_options['fields']['field_lot_category_value']['id'] = 'field_lot_category_value';
@@ -323,10 +330,10 @@ Tips for searching:<ul>
   $handler->display->display_options['fields']['field_lot_category_value']['alter']['alter_text'] = 0;
   $handler->display->display_options['fields']['field_lot_category_value']['alter']['make_link'] = 0;
   $handler->display->display_options['fields']['field_lot_category_value']['alter']['absolute'] = 0;
-  $handler->display->display_options['fields']['field_lot_category_value']['alter']['trim'] = 0;
   $handler->display->display_options['fields']['field_lot_category_value']['alter']['word_boundary'] = 1;
   $handler->display->display_options['fields']['field_lot_category_value']['alter']['ellipsis'] = 1;
   $handler->display->display_options['fields']['field_lot_category_value']['alter']['strip_tags'] = 0;
+  $handler->display->display_options['fields']['field_lot_category_value']['alter']['trim'] = 0;
   $handler->display->display_options['fields']['field_lot_category_value']['alter']['html'] = 0;
   $handler->display->display_options['fields']['field_lot_category_value']['hide_empty'] = 0;
   $handler->display->display_options['fields']['field_lot_category_value']['empty_zero'] = 0;
@@ -342,14 +349,37 @@ Tips for searching:<ul>
   $handler->display->display_options['fields']['field_lot_auction_nid']['alter']['alter_text'] = 0;
   $handler->display->display_options['fields']['field_lot_auction_nid']['alter']['make_link'] = 0;
   $handler->display->display_options['fields']['field_lot_auction_nid']['alter']['absolute'] = 0;
-  $handler->display->display_options['fields']['field_lot_auction_nid']['alter']['trim'] = 0;
   $handler->display->display_options['fields']['field_lot_auction_nid']['alter']['word_boundary'] = 1;
   $handler->display->display_options['fields']['field_lot_auction_nid']['alter']['ellipsis'] = 1;
   $handler->display->display_options['fields']['field_lot_auction_nid']['alter']['strip_tags'] = 0;
+  $handler->display->display_options['fields']['field_lot_auction_nid']['alter']['trim'] = 0;
   $handler->display->display_options['fields']['field_lot_auction_nid']['alter']['html'] = 0;
   $handler->display->display_options['fields']['field_lot_auction_nid']['hide_empty'] = 0;
   $handler->display->display_options['fields']['field_lot_auction_nid']['empty_zero'] = 0;
   $handler->display->display_options['fields']['field_lot_auction_nid']['link_to_node'] = 0;
+  /* Field: Global: Custom text */
+  $handler->display->display_options['fields']['nothing']['id'] = 'nothing';
+  $handler->display->display_options['fields']['nothing']['table'] = 'views';
+  $handler->display->display_options['fields']['nothing']['field'] = 'nothing';
+  $handler->display->display_options['fields']['nothing']['label'] = '';
+  $handler->display->display_options['fields']['nothing']['alter']['text'] = 'Bid';
+  $handler->display->display_options['fields']['nothing']['alter']['make_link'] = 1;
+  $handler->display->display_options['fields']['nothing']['alter']['path'] = 'node/[nid]';
+  $handler->display->display_options['fields']['nothing']['alter']['absolute'] = 0;
+  $handler->display->display_options['fields']['nothing']['alter']['external'] = 0;
+  $handler->display->display_options['fields']['nothing']['alter']['replace_spaces'] = 0;
+  $handler->display->display_options['fields']['nothing']['alter']['trim_whitespace'] = 0;
+  $handler->display->display_options['fields']['nothing']['alter']['nl2br'] = 0;
+  $handler->display->display_options['fields']['nothing']['alter']['word_boundary'] = 1;
+  $handler->display->display_options['fields']['nothing']['alter']['ellipsis'] = 1;
+  $handler->display->display_options['fields']['nothing']['alter']['strip_tags'] = 0;
+  $handler->display->display_options['fields']['nothing']['alter']['trim'] = 0;
+  $handler->display->display_options['fields']['nothing']['alter']['html'] = 0;
+  $handler->display->display_options['fields']['nothing']['element_label_type'] = '0';
+  $handler->display->display_options['fields']['nothing']['element_label_colon'] = 1;
+  $handler->display->display_options['fields']['nothing']['element_default_classes'] = 1;
+  $handler->display->display_options['fields']['nothing']['hide_empty'] = 0;
+  $handler->display->display_options['fields']['nothing']['empty_zero'] = 0;
   /* Argument: Node: Nid */
   $handler->display->display_options['arguments']['nid']['id'] = 'nid';
   $handler->display->display_options['arguments']['nid']['table'] = 'node';
@@ -424,8 +454,10 @@ Tips for searching:<ul>
     t('No.'),
     t('Description'),
     t('auction/!1/bid/[nid]'),
-    t('Price'),
+    t('Estimate'),
     t('Categories'),
+    t('Bid'),
+    t('node/[nid]'),
     t('All'),
     t('Search for lots in auction %1'),
     t('Specific lot number:'),
@@ -471,10 +503,10 @@ Tips for searching:<ul>
   $handler->display->display_options['fields']['title']['alter']['text'] = '<h2>[title]</h2>';
   $handler->display->display_options['fields']['title']['alter']['make_link'] = 0;
   $handler->display->display_options['fields']['title']['alter']['absolute'] = 0;
-  $handler->display->display_options['fields']['title']['alter']['trim'] = 0;
   $handler->display->display_options['fields']['title']['alter']['word_boundary'] = 1;
   $handler->display->display_options['fields']['title']['alter']['ellipsis'] = 1;
   $handler->display->display_options['fields']['title']['alter']['strip_tags'] = 0;
+  $handler->display->display_options['fields']['title']['alter']['trim'] = 0;
   $handler->display->display_options['fields']['title']['alter']['html'] = 0;
   $handler->display->display_options['fields']['title']['hide_empty'] = 0;
   $handler->display->display_options['fields']['title']['empty_zero'] = 0;
@@ -486,10 +518,10 @@ Tips for searching:<ul>
   $handler->display->display_options['fields']['field_auction_end_time_value']['alter']['alter_text'] = 0;
   $handler->display->display_options['fields']['field_auction_end_time_value']['alter']['make_link'] = 0;
   $handler->display->display_options['fields']['field_auction_end_time_value']['alter']['absolute'] = 0;
-  $handler->display->display_options['fields']['field_auction_end_time_value']['alter']['trim'] = 0;
   $handler->display->display_options['fields']['field_auction_end_time_value']['alter']['word_boundary'] = 1;
   $handler->display->display_options['fields']['field_auction_end_time_value']['alter']['ellipsis'] = 1;
   $handler->display->display_options['fields']['field_auction_end_time_value']['alter']['strip_tags'] = 0;
+  $handler->display->display_options['fields']['field_auction_end_time_value']['alter']['trim'] = 0;
   $handler->display->display_options['fields']['field_auction_end_time_value']['alter']['html'] = 0;
   $handler->display->display_options['fields']['field_auction_end_time_value']['hide_empty'] = 0;
   $handler->display->display_options['fields']['field_auction_end_time_value']['empty_zero'] = 0;
@@ -502,10 +534,10 @@ Tips for searching:<ul>
   $handler->display->display_options['fields']['field_body_value']['alter']['alter_text'] = 0;
   $handler->display->display_options['fields']['field_body_value']['alter']['make_link'] = 0;
   $handler->display->display_options['fields']['field_body_value']['alter']['absolute'] = 0;
-  $handler->display->display_options['fields']['field_body_value']['alter']['trim'] = 0;
   $handler->display->display_options['fields']['field_body_value']['alter']['word_boundary'] = 1;
   $handler->display->display_options['fields']['field_body_value']['alter']['ellipsis'] = 1;
   $handler->display->display_options['fields']['field_body_value']['alter']['strip_tags'] = 0;
+  $handler->display->display_options['fields']['field_body_value']['alter']['trim'] = 0;
   $handler->display->display_options['fields']['field_body_value']['alter']['html'] = 0;
   $handler->display->display_options['fields']['field_body_value']['hide_empty'] = 0;
   $handler->display->display_options['fields']['field_body_value']['empty_zero'] = 0;
@@ -519,10 +551,10 @@ Tips for searching:<ul>
   $handler->display->display_options['fields']['field_auction_catalogue_fid']['alter']['alter_text'] = 0;
   $handler->display->display_options['fields']['field_auction_catalogue_fid']['alter']['make_link'] = 0;
   $handler->display->display_options['fields']['field_auction_catalogue_fid']['alter']['absolute'] = 0;
-  $handler->display->display_options['fields']['field_auction_catalogue_fid']['alter']['trim'] = 0;
   $handler->display->display_options['fields']['field_auction_catalogue_fid']['alter']['word_boundary'] = 1;
   $handler->display->display_options['fields']['field_auction_catalogue_fid']['alter']['ellipsis'] = 1;
   $handler->display->display_options['fields']['field_auction_catalogue_fid']['alter']['strip_tags'] = 0;
+  $handler->display->display_options['fields']['field_auction_catalogue_fid']['alter']['trim'] = 0;
   $handler->display->display_options['fields']['field_auction_catalogue_fid']['alter']['html'] = 0;
   $handler->display->display_options['fields']['field_auction_catalogue_fid']['hide_empty'] = 0;
   $handler->display->display_options['fields']['field_auction_catalogue_fid']['empty_zero'] = 0;

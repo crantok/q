@@ -588,7 +588,7 @@ $node_field[0][\'value\'] = $result;
         ),
       ),
       'default_value_php' => NULL,
-      'label' => 'Price',
+      'label' => 'Estimate',
       'weight' => '5',
       'description' => '',
       'type' => 'number',
@@ -604,9 +604,9 @@ $node_field[0][\'value\'] = $result;
   t('Concatenation');
   t('Description');
   t('End time');
+  t('Estimate');
   t('Photo');
   t('Photos');
-  t('Price');
   t('Unsold lots');
 
   return $fields;
