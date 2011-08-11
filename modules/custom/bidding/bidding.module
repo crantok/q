@@ -307,7 +307,7 @@ function _bidding_saved_bids_page( $uid ) {
 
   if ( $num_bids == 0 ) {
     // add an empty row
-    $bids = array_pad( array(), count( $headings ), '' );
+    $bids = array( array_pad( array(), count( $headings ), ' ' ) );
   }
   
   $html = theme( 'table', $headings, $bids );
@@ -620,11 +620,13 @@ function bidding_mail( $key, &$message, $params ) {
 }
 
 
-// @todo : Things that did not get added to online_bidding feature:
-// - block visibility settings - don't want to show menu sidebar blocks on /search-auction-lots
-// - permissions - auth user needs to have all the permissions that anon user has
-// - turning off post details in the global theme configuration for auction_lot and ?
-
+// @todo : Things that (probably) cannot be added to features
+// - block visibility settings for blocks in right hand sidebar:
+//    - search-auction-lots
+//    - auction/*/search-lots
+// - turning off post details in the global theme configuration for all types
+// - resaving garland theme settings to repair it ?!?!? weird
+// - install VBO to cope with deleting lots of auction_lots
 
 // @bonus : Add simplenews to replace mailchimp (simple interface for Alec)
 // @bonus : auto-clear-up or manual delete of old lot data
